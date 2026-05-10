@@ -1,0 +1,31 @@
+# Output directories
+output/
+temp/
+logs/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.old
+
+# User-specific config (optional)
+config.local.bat
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# IDE folders
+.vs/
+.vscode/
+
+# Archive files
+*.zip
+*.7z
+*.rar
