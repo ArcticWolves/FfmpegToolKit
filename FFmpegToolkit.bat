@@ -16,14 +16,15 @@ echo ========================================
 echo        FFmpeg Console Wrapper
 echo ========================================
 echo.
-echo 1. Информация о FFmpeg
+echo 1. Информация FFmpeg
 echo 2. Поиск компонентов
 echo 3. Конвертация
 echo 4. Извлечение
 echo 5. Редактирование
 echo 6. Пакетная обработка
 echo 7. Пресеты
-echo 8. FFplay Player
+echo 8. Анализ файла (FFprobe)
+echo 9. Проигрыватель (FFplay)
 echo 0. Выход
 echo.
 
@@ -67,7 +68,12 @@ if "%CHOICE%"=="7" (
     goto MENU
     )
 
-if "%CHOICE%"=="8" (
+if "%CHOICE%"=="8" (    
+    call modules\ffprobe.bat
+    goto MENU
+    )
+
+if "%CHOICE%"=="9" (
     call ffplay.bat
     goto MENU
     )
