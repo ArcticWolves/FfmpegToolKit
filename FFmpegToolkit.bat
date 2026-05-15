@@ -1,91 +1,139 @@
 @echo off
-setlocal EnableDelayedExpansion
+setlocal EnableExtensions EnableDelayedExpansion
 chcp 65001 >nul
 
-:: Загрузка конфигурации и проверка наличия FFmpeg
-call config.bat
-if errorlevel 1 goto EXIT
+:: ============================================================
+:: FfmpegToolKit.bat
+::
+:: Главная точка входа в FFmpeg ToolKit.
+:: Отвечает только за:
+::   1. Загрузку конфигурации.
+::   2. Отображение главного меню.
+::   3. Вызов соответствующих модулей.
+::
+:: Архитектурная роль: Application Controller
+:: ============================================================
 
 
+:: ------------------------------------------------------------
+:: Загрузка глобальной конфигурации
+:: ------------------------------------------------------------
+call "%~dp0config.bat"
+if errorlevel 1 (exit /b 1)
 
-:MENU
+
+:: ------------------------------------------------------------
+:: Проверка успешной загрузки конфигурации
+:: ------------------------------------------------------------
+if not defined CONFIG_LOADED (
+    echo.
+    echo [ERROR] config.bat не был успешно загружен.
+    echo.
+    pause
+    exit /b 1
+)
+
+:MAIN_MENU
 cls
-:: Установка цвета консоли (синего текста на черном фоне)
-color 03
-echo ========================================
-echo        FFmpeg Console Wrapper
-echo ========================================
+
+echo ============================================================
+echo                     FFmpeg ToolKit
+echo ============================================================
 echo.
-echo 1. Информация FFmpeg
-echo 2. Поиск компонентов
-echo 3. Конвертация
-echo 4. Извлечение
-echo 5. Редактирование
-echo 6. Пакетная обработка
-echo 7. Пресеты
-echo 8. Анализ файла (FFprobe)
-echo 9. Проигрыватель (FFplay)
-echo 0. Выход
+echo Версия FFmpeg : %FFMPEG_VERSION%
+echo Корень проекта: %ROOT%
+echo.
+echo ============================================================
+echo.
+echo  1. Проигрыватель  (FFplay)
+echo  2. Анализатор     (FFprobe)
+echo  3. Обработка      (FFmpeg)
+echo.
+echo  0. Выход
+echo.
+echo ============================================================
 echo.
 
-set /p CHOICE=Выберите пункт:
+set "CHOICE="
+set /p "CHOICE=Выберите действие: "
 
-:: Вернуть стандартный цвет (светло-серый на чёрном фоне)
-color 07 
-
-
-if "%CHOICE%"=="1" (
-    call modules\info.bat 
-    goto MENU
-    )
-
-if "%CHOICE%"=="2" (
-    call modules\search.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="3" (
-    call modules\convert.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="4" (
-    call modules\extract.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="5" (
-    call modules\edit.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="6" (
-    call modules\batch.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="7" (
-    call modules\presets.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="8" (    
-    call modules\ffprobe.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="9" (
-    call ffplay.bat
-    goto MENU
-    )
-
-if "%CHOICE%"=="0" goto EXIT
+if "%CHOICE%"=="1" goto MENU_FFPLAY
+if "%CHOICE%"=="2" goto MENU_FFPROBE
+if "%CHOICE%"=="3" goto MENU_FFMPEG
+if "%CHOICE%"=="0" goto EXIT_APP
 
 echo.
-echo Некорректный выбор.
+echo [ERROR] Некорректный выбор.
+echo.
 pause
-goto MENU
+goto MAIN_MENU
 
-:EXIT
+
+:: ============================================================
+:: FFPLAY
+:: ============================================================
+:MENU_FFPLAY
+
+if "%HAS_FFPLAY%"=="0" (
+    echo.
+    echo [ERROR] ffplay.exe отсутствует в сборке.
+    echo.
+    pause
+    goto MAIN_MENU
+)
+
+call :RunModule "ffplay.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: FFPROBE
+:: ============================================================
+:MENU_FFPROBE
+call :RunModule "ffprobe.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: FFMPEG
+:: ============================================================
+:MENU_FFMPEG
+call :RunModule "ffmpeg.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: Универсальный запуск модуля
+:: Аргумент:
+::   %~1 = имя bat-файла в каталоге modules
+:: ============================================================
+:RunModule
+set "MODULE_PATH=%MODULES_DIR%\%~1"
+
+if not exist "%MODULE_PATH%" (
+    echo.
+    echo [ERROR] Не найден модуль:
+    echo         %MODULE_PATH%
+    echo.
+    pause
+    exit /b 1
+)
+
+call "%MODULE_PATH%"
+exit /b 0
+
+
+:: ============================================================
+:: Завершение приложения
+:: ============================================================
+:EXIT_APP
+cls
+echo ============================================================
+echo               Завершение работы
+echo ============================================================
+echo.
+echo Спасибо за использование FFmpeg ToolKit.
+echo.
+
 endlocal
-exit /b
+exit /b 0
