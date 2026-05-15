@@ -31,7 +31,8 @@ echo.
 set /p CHOICE=Выберите пункт:
 
 :: Вернуть стандартный цвет (светло-серый на чёрном фоне)
-color 07
+color 07 
+
 
 if "%CHOICE%"=="1" (
     call modules\info.bat 
