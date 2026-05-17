@@ -1,0 +1,14 @@
+Поместите в эту папку все ваши файлы LUT. 
+Поддерживаются форматы: 
+
+1. lutname.cube
+2. lutname.3dl
+3. lutname.dat
+
+Если вам нужно создать свой фаил Lut.
+
+Воспользуйтесь онлайн решением:
+https://github.com/o-l-l-i/lut-maker
+
+Или установите дополнение для Gimp/Krita
+https://gmic.eu/
