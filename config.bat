@@ -35,12 +35,13 @@ set "FFPLAY=%ROOT%\source\bin\ffplay.exe"
 set "INPUT_DIR=%ROOT%\input"
 set "OUTPUT_DIR=%ROOT%\output"
 set "TEMP_DIR=%ROOT%\temp"
-set "LOG_DIR=%ROOT%\logs"
+set "LOG_DIR=%TEMP_DIR%\logs"
 set "MODULES_DIR=%ROOT%\modules"
 set "PRESETS_DIR=%ROOT%\presets"
 set "LUTS_DIR=%ROOT%\luts"
 set "SELECTORS_DIR=%ROOT%\selectors"
-set "TRANSFORMS_DIR=%ROOT%\transforms"
+set "TRANSFORMS_DIR=%TEMP_DIR%\transforms"
+set "PALETTES_DIR=%TEMP_DIR%\palettes"
 
 :: ----------------------------------------------------------------------------
 :: Глобальные параметры FFmpeg
@@ -61,6 +62,7 @@ for %%D in (
     "%PRESETS_DIR%"
     "%LUTS_DIR%"
     "%TRANSFORMS_DIR%"
+    "%PALETTES_DIR%"
 ) do (if not exist "%%~D" mkdir "%%~D")
 
 
@@ -116,6 +118,7 @@ endlocal & (
     set "PRESETS_DIR=%PRESETS_DIR%"
     set "LUTS_DIR=%LUTS_DIR%"
     set "TRANSFORMS_DIR=%TRANSFORMS_DIR%"
+    set "PALETTES_DIR=%PALETTES_DIR%"
 
     set "FFMPEG_GLOBAL_OPTIONS=%FFMPEG_GLOBAL_OPTIONS%"
     set "FFPROBE_GLOBAL_OPTIONS=%FFPROBE_GLOBAL_OPTIONS%"
