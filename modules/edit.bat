@@ -59,6 +59,7 @@ echo  6. Наложение изображения или видео (Overlay)
 echo  7. Цветокоррекция
 echo  8. Стабилизация
 echo  9. Обрезка области (Crop)
+echo  10. Добавить текст (DrawText)
 echo.
 echo  0. Назад
 echo.
@@ -77,6 +78,7 @@ if "%CHOICE%"=="6" goto MENU_OVERLAY
 if "%CHOICE%"=="7" goto MENU_COLOR_CORRECTION
 if "%CHOICE%"=="8" goto MENU_STABILIZATION
 if "%CHOICE%"=="9" call :RunModule "edit\crop.bat"
+if "%CHOICE%"=="10" goto MENU_DRAWTEXT
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
@@ -141,7 +143,6 @@ rem ============================================================
 call :RunModule "edit\filters\color_correction.bat"
 goto MAIN_MENU
 
-
 rem ============================================================
 rem 8. Стабилизация
 rem ============================================================
@@ -149,6 +150,13 @@ rem ============================================================
 call :RunModule "edit\stabilization.bat"
 goto MAIN_MENU
 
+
+rem ============================================================
+rem 10. Наложение текста
+rem ============================================================
+:MENU_DRAWTEXT
+call :RunModule "edit\drawtext.bat"
+goto MAIN_MENU
 
 rem ============================================================
 rem Универсальный запуск модуля
