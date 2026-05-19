@@ -3,20 +3,17 @@ setlocal EnableExtensions EnableDelayedExpansion
 chcp 65001 >nul
 
 rem ============================================================
-rem modules\convert\mp4_h264.bat
+rem modules\convert\mp4_h265.bat
 rem
-rem Конвертация в MP4 (H.264 + AAC)
+rem Конвертация в MP4 (H.265/HEVC + AAC)
 rem
-rem Особенность:
-rem   Пользователь выбирает кодеки через селекторы:
-rem     - selectors\select_video_codec.bat
-rem     - selectors\select_audio_codec.bat
+rem Использует пользовательские селекторы:
+rem   selectors\select_video_codec.bat
+rem   selectors\select_audio_codec.bat
 rem
-rem Требуемые переменные после вызова селекторов:
-rem   VIDEO_CODEC
-rem   VIDEO_CODEC_OPTIONS
-rem   AUDIO_CODEC
-rem   AUDIO_CODEC_OPTIONS
+rem По умолчанию:
+rem   Video : libx265
+rem   Audio : aac
 rem ============================================================
 
 rem ------------------------------------------------------------
@@ -61,8 +58,8 @@ for %%F in ("%INPUT_FILE%") do (
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
-set "VIDEO_CODEC=libx264"
-set "VIDEO_CODEC_OPTIONS=-preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart"
+set "VIDEO_CODEC=libx265"
+set "VIDEO_CODEC_OPTIONS=-preset medium -crf 22 -tag:v hvc1 -pix_fmt yuv420p"
 
 set "AUDIO_CODEC=aac"
 set "AUDIO_CODEC_OPTIONS=-b:a 192k"
@@ -71,17 +68,17 @@ set "AUDIO_CODEC_OPTIONS=-b:a 192k"
 cls
 
 echo ============================================================
-echo                 MP4 (H.264 + AAC)
+echo                 MP4 (H.265 + AAC)
 echo ============================================================
 echo.
 echo Входной файл:
 echo %INPUT_FILE%
 echo.
-echo Текущий видеокодек:
+echo Видеокодек:
 echo   %VIDEO_CODEC%
 echo   %VIDEO_CODEC_OPTIONS%
 echo.
-echo Текущий аудиокодек:
+echo Аудиокодек:
 echo   %AUDIO_CODEC%
 echo   %AUDIO_CODEC_OPTIONS%
 echo.
@@ -106,14 +103,10 @@ if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
 echo [ERROR] Некорректный выбор.
-echo.
 pause
 goto MAIN_MENU
 
 
-rem ============================================================
-rem Выбор видеокодека
-rem ============================================================
 :SELECT_VIDEO_CODEC
 if exist "%ROOT%\selectors\select_video_codec.bat" (
     call "%ROOT%\selectors\select_video_codec.bat"
@@ -126,19 +119,16 @@ if exist "%ROOT%\selectors\select_video_codec.bat" (
 )
 
 if not defined VIDEO_CODEC (
-    set "VIDEO_CODEC=libx264"
+    set "VIDEO_CODEC=libx265"
 )
 
 if not defined VIDEO_CODEC_OPTIONS (
-    set "VIDEO_CODEC_OPTIONS=-preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart"
+    set "VIDEO_CODEC_OPTIONS=-preset medium -crf 22 -tag:v hvc1 -pix_fmt yuv420p"
 )
 
 goto MAIN_MENU
 
 
-rem ============================================================
-rem Выбор аудиокодека
-rem ============================================================
 :SELECT_AUDIO_CODEC
 if exist "%ROOT%\selectors\select_audio_codec.bat" (
     call "%ROOT%\selectors\select_audio_codec.bat"
@@ -161,11 +151,8 @@ if not defined AUDIO_CODEC_OPTIONS (
 goto MAIN_MENU
 
 
-rem ============================================================
-rem Выполнение конвертации
-rem ============================================================
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_converted.mp4"
+set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_h265.mp4"
 
 cls
 echo ============================================================
@@ -192,6 +179,7 @@ pause >nul
 -i "%INPUT_FILE%" ^
 -c:v %VIDEO_CODEC% %VIDEO_CODEC_OPTIONS% ^
 -c:a %AUDIO_CODEC% %AUDIO_CODEC_OPTIONS% ^
+-movflags +faststart ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (
@@ -225,9 +213,6 @@ pause
 goto MAIN_MENU
 
 
-rem ============================================================
-rem Выход
-rem ============================================================
 :EXIT_MODULE
 endlocal
 exit /b 0
