@@ -76,6 +76,7 @@ if "%CHOICE%"=="5" goto MENU_RESIZE
 if "%CHOICE%"=="6" goto MENU_OVERLAY
 if "%CHOICE%"=="7" goto MENU_COLOR_CORRECTION
 if "%CHOICE%"=="8" goto MENU_STABILIZATION
+if "%CHOICE%"=="9" call :RunModule "edit\crop.bat"
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
