@@ -87,7 +87,7 @@ goto MAIN_MENU
 
 
 :OpenModule
-call :SelectInputFile || exit /b 1
+call "%SELECTORS_DIR%\select_input_file.bat" || exit /b 1
 
 set "MODULE_PATH=%MODULES_DIR%\%~1"
 
@@ -101,56 +101,6 @@ if not exist "%MODULE_PATH%" (
 )
 
 call "%MODULE_PATH%"
-exit /b 0
-
-
-:SelectInputFile
-set "INPUT_FILE="
-set "FILE_COUNT=0"
-
-for %%F in ("%INPUT_DIR%\*") do (
-    if exist "%%F" (
-        set /a FILE_COUNT+=1
-        set "FILE_!FILE_COUNT!=%%~fF"
-        set "FILE_NAME_!FILE_COUNT!=%%~nxF"
-    )
-)
-
-if "!FILE_COUNT!"=="0" (
-    echo.
-    echo [ERROR] В папке input нет файлов.
-    echo.
-    pause
-    exit /b 1
-)
-
-if "!FILE_COUNT!"=="1" (
-    set "INPUT_FILE=!FILE_1!"
-    exit /b 0
-)
-
-echo.
-echo Доступные файлы:
-echo.
-
-for /L %%I in (1,1,!FILE_COUNT!) do (
-    call echo %%I. %%FILE_NAME_%%I%%
-)
-
-echo.
-set /p "FILE_INDEX=Выберите номер файла: "
-
-if not defined FILE_INDEX exit /b 1
-
-call set "INPUT_FILE=%%FILE_%FILE_INDEX%%"
-
-if not defined INPUT_FILE (
-    echo.
-    echo [ERROR] Некорректный выбор.
-    pause
-    exit /b 1
-)
-
 exit /b 0
 
 

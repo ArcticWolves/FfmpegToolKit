@@ -61,6 +61,10 @@ for %%F in ("%INPUT_FILE%") do (
     set "INPUT_NAME=%%~nF"
 )
 
+set "TARGET_CONTAINER=ogv"
+set "OUTPUT_EXT=ogv"
+set "OUTPUT_SUFFIX=ogv"
+
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
@@ -167,7 +171,8 @@ rem ============================================================
 rem Выполнение конвертации
 rem ============================================================
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_ogv.ogv"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

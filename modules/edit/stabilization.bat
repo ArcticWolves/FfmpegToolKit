@@ -23,6 +23,9 @@ if not defined CONFIG_LOADED (
     exit /b 1
 )
 
+set "HAS_VIDSTAB=0"
+"%FFMPEG%" -hide_banner -filters | findstr /i "vidstabdetect" >nul && set "HAS_VIDSTAB=1"
+
 :MAIN_MENU
 cls
 
@@ -31,10 +34,19 @@ echo                    Стабилизация видео
 echo ============================================================
 echo.
 echo  1. Deshake
-echo  2. VidStab (Автоматическая стабилизация)
+if "%HAS_VIDSTAB%"=="1" (
+    echo  2. VidStab (Автоматическая стабилизация)
+) else (
+    echo  2. VidStab (недоступен в текущей сборке FFmpeg)
+)
 echo.
-echo  3. VidStab Detect    [Служебный режим]
-echo  4. VidStab Transform [Служебный режим]
+if "%HAS_VIDSTAB%"=="1" (
+    echo  3. VidStab Detect    [Служебный режим]
+    echo  4. VidStab Transform [Служебный режим]
+) else (
+    echo  3. VidStab Detect    [недоступен]
+    echo  4. VidStab Transform [недоступен]
+)
 echo.
 echo  0. Назад
 echo.
@@ -45,6 +57,9 @@ set "CHOICE="
 set /p "CHOICE=Выберите метод стабилизации: "
 
 if "%CHOICE%"=="1" goto MENU_DESHAKE
+if "%CHOICE%"=="2" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
+if "%CHOICE%"=="3" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
+if "%CHOICE%"=="4" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
 if "%CHOICE%"=="2" goto MENU_VIDSTAB
 if "%CHOICE%"=="3" goto MENU_VIDSTABDETECT
 if "%CHOICE%"=="4" goto MENU_VIDSTABTRANSFORM
@@ -52,6 +67,15 @@ if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
 echo [ERROR] Некорректный выбор.
+echo.
+pause
+goto MAIN_MENU
+
+
+:VIDSTAB_UNAVAILABLE
+echo.
+echo [ERROR] VidStab недоступен в текущей сборке FFmpeg.
+echo [ERROR] Используйте Deshake или замените FFmpeg на сборку с libvidstab.
 echo.
 pause
 goto MAIN_MENU

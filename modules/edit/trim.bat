@@ -59,7 +59,7 @@ echo.
 :: ------------------------------------------------------------
 :: Ввод исходного файла
 :: ------------------------------------------------------------
-call "%MODULES_DIR%\select.bat"
+call "%SELECTORS_DIR%\select_input_file.bat"
 if errorlevel 1 goto EXIT_MODULE
 
 if not exist "%INPUT_FILE%" (

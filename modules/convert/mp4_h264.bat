@@ -58,11 +58,15 @@ for %%F in ("%INPUT_FILE%") do (
     set "INPUT_NAME=%%~nF"
 )
 
+set "TARGET_CONTAINER=mp4"
+set "OUTPUT_EXT=mp4"
+set "OUTPUT_SUFFIX=h264"
+
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
-set "VIDEO_CODEC=libx264"
-set "VIDEO_CODEC_OPTIONS=-preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart"
+set "VIDEO_CODEC=libopenh264"
+set "VIDEO_CODEC_OPTIONS=-b:v 5M -pix_fmt yuv420p"
 
 set "AUDIO_CODEC=aac"
 set "AUDIO_CODEC_OPTIONS=-b:a 192k"
@@ -126,11 +130,11 @@ if exist "%ROOT%\selectors\select_video_codec.bat" (
 )
 
 if not defined VIDEO_CODEC (
-    set "VIDEO_CODEC=libx264"
+    set "VIDEO_CODEC=libopenh264"
 )
 
 if not defined VIDEO_CODEC_OPTIONS (
-    set "VIDEO_CODEC_OPTIONS=-preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart"
+    set "VIDEO_CODEC_OPTIONS=-b:v 5M -pix_fmt yuv420p"
 )
 
 goto MAIN_MENU
@@ -165,7 +169,8 @@ rem ============================================================
 rem Выполнение конвертации
 rem ============================================================
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_converted.mp4"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================
@@ -192,6 +197,7 @@ pause >nul
 -i "%INPUT_FILE%" ^
 -c:v %VIDEO_CODEC% %VIDEO_CODEC_OPTIONS% ^
 -c:a %AUDIO_CODEC% %AUDIO_CODEC_OPTIONS% ^
+-movflags +faststart ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

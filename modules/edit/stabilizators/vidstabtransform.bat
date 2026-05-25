@@ -289,9 +289,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%VIDSTAB_FILTER%" ^
--c:v libx264 ^
--crf 18 ^
--preset slow ^
+-c:v libopenh264 ^
+-b:v 5M ^
 -c:a copy ^
 "%OUTPUT_FILE%"
 

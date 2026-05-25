@@ -51,7 +51,7 @@ goto RETURN
 :PRESET_H264
 set "PRESET_NAME=MP4 H.264 High Quality"
 set "PRESET_EXT=mp4"
-set "PRESET_ARGS=-c:v libx264 -preset slow -crf 18 -c:a aac -b:a 192k"
+set "PRESET_ARGS=-c:v libopenh264 -b:v 5M -c:a aac -b:a 192k"
 goto RETURN
 
 :PRESET_AV1

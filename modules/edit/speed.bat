@@ -207,9 +207,8 @@ pause >nul
 -i "%INPUT_FILE%" ^
 -filter:v "%VIDEO_FILTER%" ^
 -filter:a "%AUDIO_FILTER%" ^
--c:v libx264 ^
--crf 18 ^
--preset medium ^
+-c:v libopenh264 ^
+-b:v 5M ^
 -c:a aac ^
 -b:a 192k ^
 "%OUTPUT_FILE%"

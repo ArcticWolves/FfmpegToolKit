@@ -82,7 +82,7 @@ if "%HAS_FFPLAY%"=="0" (
     goto MAIN_MENU
 )
 
-call :RunModule "ffplay.bat"
+call "%ROOT%\ffplay.bat"
 goto MAIN_MENU
 
 

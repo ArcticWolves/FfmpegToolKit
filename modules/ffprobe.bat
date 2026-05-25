@@ -310,14 +310,13 @@ rem ============================================================================
 :DisplayPresence
 set "TITLE=%~1"
 set "STREAM=%~2"
+set "RESULT=0"
 
-"%FFPROBE%" -v error -select_streams %STREAM% ^
--show_entries stream=index ^
--of csv^=p^=0 "%INPUT%" >nul 2>&1
-
-if errorlevel 1 (
-    set "RESULT=0"
-) else (
+for /f "delims=" %%I in ('
+    "%FFPROBE%" -v error -select_streams %STREAM% ^
+    -show_entries stream^=index ^
+    -of csv^=p^=0 "%INPUT%"
+') do (
     set "RESULT=1"
 )
 

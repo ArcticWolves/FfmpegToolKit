@@ -12,7 +12,7 @@ rem   selectors\select_video_codec.bat
 rem   selectors\select_audio_codec.bat
 rem
 rem По умолчанию:
-rem   Video : libx265
+rem   Video : libkvazaar
 rem   Audio : aac
 rem ============================================================
 
@@ -55,11 +55,15 @@ for %%F in ("%INPUT_FILE%") do (
     set "INPUT_NAME=%%~nF"
 )
 
+set "TARGET_CONTAINER=mp4"
+set "OUTPUT_EXT=mp4"
+set "OUTPUT_SUFFIX=h265"
+
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
-set "VIDEO_CODEC=libx265"
-set "VIDEO_CODEC_OPTIONS=-preset medium -crf 22 -tag:v hvc1 -pix_fmt yuv420p"
+set "VIDEO_CODEC=libkvazaar"
+set "VIDEO_CODEC_OPTIONS=-b:v 5M -tag:v hvc1 -pix_fmt yuv420p"
 
 set "AUDIO_CODEC=aac"
 set "AUDIO_CODEC_OPTIONS=-b:a 192k"
@@ -119,11 +123,11 @@ if exist "%ROOT%\selectors\select_video_codec.bat" (
 )
 
 if not defined VIDEO_CODEC (
-    set "VIDEO_CODEC=libx265"
+    set "VIDEO_CODEC=libkvazaar"
 )
 
 if not defined VIDEO_CODEC_OPTIONS (
-    set "VIDEO_CODEC_OPTIONS=-preset medium -crf 22 -tag:v hvc1 -pix_fmt yuv420p"
+    set "VIDEO_CODEC_OPTIONS=-b:v 5M -tag:v hvc1 -pix_fmt yuv420p"
 )
 
 goto MAIN_MENU
@@ -152,7 +156,8 @@ goto MAIN_MENU
 
 
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_h265.mp4"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

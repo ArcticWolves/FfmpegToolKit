@@ -77,7 +77,7 @@ if "%CHOICE%"=="5" goto MENU_RESIZE
 if "%CHOICE%"=="6" goto MENU_OVERLAY
 if "%CHOICE%"=="7" goto MENU_COLOR_CORRECTION
 if "%CHOICE%"=="8" goto MENU_STABILIZATION
-if "%CHOICE%"=="9" call :RunModule "edit\crop.bat"
+if "%CHOICE%"=="9" goto MENU_CROP
 if "%CHOICE%"=="10" goto MENU_DRAWTEXT
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
@@ -108,7 +108,7 @@ rem ============================================================
 rem 3. Изменение скорости
 rem ============================================================
 :MENU_SPEED
-call :RunModule "edit\speed.bat"
+call :RunInputModule "edit\speed.bat"
 goto MAIN_MENU
 
 
@@ -116,7 +116,7 @@ rem ============================================================
 rem 4. Поворот
 rem ============================================================
 :MENU_ROTATE
-call :RunModule "edit\rotate.bat"
+call :RunInputModule "edit\rotate.bat"
 goto MAIN_MENU
 
 
@@ -124,7 +124,7 @@ rem ============================================================
 rem 5. Изменение размера
 rem ============================================================
 :MENU_RESIZE
-call :RunModule "edit\resize.bat"
+call :RunInputModule "edit\resize.bat"
 goto MAIN_MENU
 
 
@@ -132,7 +132,7 @@ rem ============================================================
 rem 6. Наложение изображения или видео (Overlay)
 rem ============================================================
 :MENU_OVERLAY
-call :RunModule "edit\overlay.bat"
+call :RunInputModule "edit\overlay.bat"
 goto MAIN_MENU
 
 
@@ -140,14 +140,22 @@ rem ============================================================
 rem 7. Цветокоррекция
 rem ============================================================
 :MENU_COLOR_CORRECTION
-call :RunModule "edit\filters\color_correction.bat"
+call :RunInputModule "edit\color_correction.bat"
 goto MAIN_MENU
 
 rem ============================================================
 rem 8. Стабилизация
 rem ============================================================
 :MENU_STABILIZATION
-call :RunModule "edit\stabilization.bat"
+call :RunInputModule "edit\stabilization.bat"
+goto MAIN_MENU
+
+
+rem ============================================================
+rem 9. Обрезка области
+rem ============================================================
+:MENU_CROP
+call :RunInputModule "edit\crop.bat"
 goto MAIN_MENU
 
 
@@ -155,7 +163,7 @@ rem ============================================================
 rem 10. Наложение текста
 rem ============================================================
 :MENU_DRAWTEXT
-call :RunModule "edit\drawtext.bat"
+call :RunInputModule "edit\drawtext.bat"
 goto MAIN_MENU
 
 rem ============================================================
@@ -180,6 +188,17 @@ if not exist "%MODULE_PATH%" (
 )
 
 call "%MODULE_PATH%"
+exit /b 0
+
+
+rem ============================================================
+rem Запуск модуля, которому нужен INPUT_FILE
+rem ============================================================
+:RunInputModule
+call "%SELECTORS_DIR%\select_input_file.bat"
+if errorlevel 1 exit /b 1
+
+call :RunModule "%~1"
 exit /b 0
 
 

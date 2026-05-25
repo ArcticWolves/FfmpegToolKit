@@ -242,9 +242,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%VIDEO_FILTER%" ^
--c:v libx264 ^
--crf 18 ^
--preset medium ^
+-c:v libopenh264 ^
+-b:v 5M ^
 -c:a copy ^
 "%OUTPUT_FILE%"
 

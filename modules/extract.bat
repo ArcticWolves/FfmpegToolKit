@@ -1,5 +1,14 @@
 @echo off
 
+if not defined CONFIG_LOADED (
+    echo.
+    echo [ERROR] Конфигурация не загружена.
+    echo [ERROR] Запустите FFmpegToolKit.bat.
+    echo.
+    pause
+    exit /b 1
+)
+
 :MENU
 cls
 echo ========================================
@@ -44,7 +53,7 @@ if "%OUTPUT%"=="" (
 set "AUDIO_CODEC="
 
 for /f "delims=" %%A in ('
-    %FFPROBE% -v error ^
+    "%FFPROBE%" -v error ^
     -select_streams a:0 ^
     -show_entries stream^=codec_name ^
     -of csv^=p^=0 ^
@@ -152,7 +161,7 @@ echo Выходной файл:
 echo %OUTPUT_DIR%\%OUTPUT%.%EXT%
 echo.
 
-ffmpeg -y -i "%INPUT%" -vn -c:a copy "%OUTPUT_DIR%\%OUTPUT%.%EXT%"
+"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -i "%INPUT%" -vn -c:a copy "%OUTPUT_DIR%\%OUTPUT%.%EXT%"
 
 if exist "%OUTPUT_DIR%\%OUTPUT%.%EXT%" (
     echo.
@@ -171,27 +180,27 @@ goto MENU
 :EXTRACT_VIDEO
 set /p INPUT=Введите путь к исходному файлу:
 set /p OUTPUT=Введите имя выходного файла (например video.h264):
-ffmpeg -y -i "%INPUT%" -an -c:v copy "%OUTPUT_DIR%\%OUTPUT%"
+"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -i "%INPUT%" -an -c:v copy "%OUTPUT_DIR%\%OUTPUT%"
 pause
 goto MENU
 
 :EXTRACT_SUBS
 set /p INPUT=Введите путь к исходному файлу:
 set /p OUTPUT=Введите имя файла субтитров (например subtitles.srt):
-ffmpeg -y -i "%INPUT%" -map 0:s:0 "%OUTPUT_DIR%\%OUTPUT%"
+"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -i "%INPUT%" -map 0:s:0 "%OUTPUT_DIR%\%OUTPUT%"
 pause
 goto MENU
 
 :EXTRACT_FRAMES
 set /p INPUT=Введите путь к видео:
 set /p OUTPUT=Введите шаблон (например frame_%%04d.png):
-ffmpeg -y -i "%INPUT%" "%OUTPUT_DIR%\%OUTPUT%"
+"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -i "%INPUT%" "%OUTPUT_DIR%\%OUTPUT%"
 pause
 goto MENU
 
 :EXTRACT_COVER
 set /p INPUT=Введите путь к аудиофайлу:
 set /p OUTPUT=Введите имя изображения (например cover.jpg):
-ffmpeg -y -i "%INPUT%" -an -c:v copy "%OUTPUT_DIR%\%OUTPUT%"
+"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -i "%INPUT%" -an -c:v copy "%OUTPUT_DIR%\%OUTPUT%"
 pause
 goto MENU

@@ -60,6 +60,10 @@ for %%F in ("%INPUT_FILE%") do (
     set "INPUT_NAME=%%~nF"
 )
 
+set "TARGET_CONTAINER=webm"
+set "OUTPUT_EXT=webm"
+set "OUTPUT_SUFFIX=webm"
+
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
@@ -157,7 +161,8 @@ goto MAIN_MENU
 
 
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_webm.webm"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

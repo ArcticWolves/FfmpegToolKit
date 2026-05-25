@@ -1,23 +1,32 @@
 @echo off
 cls
 
+if not defined CONFIG_LOADED (
+    echo.
+    echo [ERROR] Конфигурация не загружена.
+    echo [ERROR] Запустите FFmpegToolKit.bat.
+    echo.
+    pause
+    exit /b 1
+)
+
 set /p QUERY=Введите строку поиска:
 
 echo.
 echo ===== Codecs =====
-ffmpeg -codecs | findstr /i "%QUERY%"
+"%FFMPEG%" -codecs | findstr /i "%QUERY%"
 
 echo.
 echo ===== Encoders =====
-ffmpeg -encoders | findstr /i "%QUERY%"
+"%FFMPEG%" -encoders | findstr /i "%QUERY%"
 
 echo.
 echo ===== Decoders =====
-ffmpeg -decoders | findstr /i "%QUERY%"
+"%FFMPEG%" -decoders | findstr /i "%QUERY%"
 
 echo.
 echo ===== Filters =====
-ffmpeg -filters | findstr /i "%QUERY%"
+"%FFMPEG%" -filters | findstr /i "%QUERY%"
 
 echo.
 pause

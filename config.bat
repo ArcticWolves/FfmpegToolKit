@@ -37,6 +37,7 @@ set "OUTPUT_DIR=%ROOT%\output"
 set "TEMP_DIR=%ROOT%\temp"
 set "LOG_DIR=%TEMP_DIR%\logs"
 set "MODULES_DIR=%ROOT%\modules"
+set "CODECS_DIR=%MODULES_DIR%\codecs"
 set "PRESETS_DIR=%ROOT%\presets"
 set "LUTS_DIR=%ROOT%\luts"
 set "SELECTORS_DIR=%ROOT%\selectors"
@@ -59,6 +60,7 @@ for %%D in (
     "%OUTPUT_DIR%"
     "%TEMP_DIR%"
     "%LOG_DIR%"
+    "%CODECS_DIR%"
     "%PRESETS_DIR%"
     "%LUTS_DIR%"
     "%TRANSFORMS_DIR%"
@@ -84,11 +86,11 @@ if exist "%FFPLAY%" (set "HAS_FFPLAY=1") else (set "HAS_FFPLAY=0")
 :: ----------------------------------------------------------------------------
 set "FFMPEG_VERSION=unknown"
 
-for /f "tokens=3" %%V in ('
-    "%FFMPEG%" -version 2^>nul ^| findstr /b "ffmpeg version"
-') do (
-    set "FFMPEG_VERSION=%%V"
-    goto :VersionDetected
+for /f "tokens=1,2,3" %%A in ('"%FFMPEG%" -version 2^>nul') do (
+    if /I "%%A %%B"=="ffmpeg version" (
+        set "FFMPEG_VERSION=%%C"
+        goto :VersionDetected
+    )
 )
 
 :VersionDetected
@@ -115,6 +117,7 @@ endlocal & (
     set "TEMP_DIR=%TEMP_DIR%"
     set "LOG_DIR=%LOG_DIR%"
     set "MODULES_DIR=%MODULES_DIR%"
+    set "CODECS_DIR=%CODECS_DIR%"
     set "PRESETS_DIR=%PRESETS_DIR%"
     set "LUTS_DIR=%LUTS_DIR%"
     set "TRANSFORMS_DIR=%TRANSFORMS_DIR%"

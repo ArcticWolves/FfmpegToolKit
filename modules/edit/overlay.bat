@@ -347,9 +347,8 @@ pause >nul
 -filter_complex "%FILTER_COMPLEX%" ^
 -map 0:v ^
 -map 0:a? ^
--c:v libx264 ^
--crf 18 ^
--preset medium ^
+-c:v libopenh264 ^
+-b:v 5M ^
 -c:a copy ^
 -shortest ^
 "%OUTPUT_FILE%"
