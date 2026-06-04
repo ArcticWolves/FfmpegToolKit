@@ -103,14 +103,22 @@ echo.
 set "CHOICE="
 set /p "CHOICE=Выберите коэффициент скорости: "
 
-if "%CHOICE%"=="1" set "SPEED=0.25" & goto BUILD_FILTERS
-if "%CHOICE%"=="2" set "SPEED=0.50" & goto BUILD_FILTERS
-if "%CHOICE%"=="3" set "SPEED=0.75" & goto BUILD_FILTERS
-if "%CHOICE%"=="4" set "SPEED=1.00" & goto BUILD_FILTERS
-if "%CHOICE%"=="5" set "SPEED=1.25" & goto BUILD_FILTERS
-if "%CHOICE%"=="6" set "SPEED=1.50" & goto BUILD_FILTERS
-if "%CHOICE%"=="7" set "SPEED=2.00" & goto BUILD_FILTERS
-if "%CHOICE%"=="8" set "SPEED=4.00" & goto BUILD_FILTERS
+if "%CHOICE%"=="1" set "SPEED=0.25"
+if "%CHOICE%"=="1" goto BUILD_FILTERS
+if "%CHOICE%"=="2" set "SPEED=0.50"
+if "%CHOICE%"=="2" goto BUILD_FILTERS
+if "%CHOICE%"=="3" set "SPEED=0.75"
+if "%CHOICE%"=="3" goto BUILD_FILTERS
+if "%CHOICE%"=="4" set "SPEED=1.00"
+if "%CHOICE%"=="4" goto BUILD_FILTERS
+if "%CHOICE%"=="5" set "SPEED=1.25"
+if "%CHOICE%"=="5" goto BUILD_FILTERS
+if "%CHOICE%"=="6" set "SPEED=1.50"
+if "%CHOICE%"=="6" goto BUILD_FILTERS
+if "%CHOICE%"=="7" set "SPEED=2.00"
+if "%CHOICE%"=="7" goto BUILD_FILTERS
+if "%CHOICE%"=="8" set "SPEED=4.00"
+if "%CHOICE%"=="8" goto BUILD_FILTERS
 if "%CHOICE%"=="9" goto CUSTOM_SPEED
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
@@ -179,7 +187,14 @@ rem ============================================================
 :RUN
 cls
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_speed_%SPEED%x%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=speed_%SPEED%x"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
+
+set "EDIT_ALLOW_AUDIO_COPY=0"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto MAIN_MENU
 
 echo ============================================================
 echo                Изменение скорости
@@ -207,10 +222,8 @@ pause >nul
 -i "%INPUT_FILE%" ^
 -filter:v "%VIDEO_FILTER%" ^
 -filter:a "%AUDIO_FILTER%" ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a aac ^
--b:a 192k ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

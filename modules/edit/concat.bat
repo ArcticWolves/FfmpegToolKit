@@ -224,24 +224,11 @@ for %%F in ("!FIRST_FILE!") do (
     set "BASE_NAME=%%~nF"
 )
 
-set "DEFAULT_OUTPUT=%OUTPUT_DIR%\%BASE_NAME%_concat%INPUT_EXT%"
-
-echo ============================================================
-echo                 Настройка выходного файла
-echo ============================================================
-echo.
-echo Предлагаемый файл:
-echo %DEFAULT_OUTPUT%
-echo.
-echo Нажмите Enter, чтобы использовать путь по умолчанию.
-echo.
-
-set "OUTPUT_FILE="
-set /p "OUTPUT_FILE=Выходной файл: "
-
-if not defined OUTPUT_FILE (
-    set "OUTPUT_FILE=%DEFAULT_OUTPUT%"
-)
+set "INPUT_FILE=!FIRST_FILE!"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=concat"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 goto RUN_CONCAT
 

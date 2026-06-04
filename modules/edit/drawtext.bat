@@ -231,11 +231,21 @@ echo.
 set "CHOICE="
 set /p "CHOICE=Выберите позицию: "
 
-if "%CHOICE%"=="1" set "POS_X=20" & set "POS_Y=20" & goto ASK_TIME
-if "%CHOICE%"=="2" set "POS_X=w-text_w-20" & set "POS_Y=20" & goto ASK_TIME
-if "%CHOICE%"=="3" set "POS_X=20" & set "POS_Y=h-text_h-20" & goto ASK_TIME
-if "%CHOICE%"=="4" set "POS_X=w-text_w-20" & set "POS_Y=h-text_h-20" & goto ASK_TIME
-if "%CHOICE%"=="5" set "POS_X=(w-text_w)/2" & set "POS_Y=(h-text_h)/2" & goto ASK_TIME
+if "%CHOICE%"=="1" set "POS_X=20"
+if "%CHOICE%"=="1" set "POS_Y=20"
+if "%CHOICE%"=="1" goto ASK_TIME
+if "%CHOICE%"=="2" set "POS_X=w-text_w-20"
+if "%CHOICE%"=="2" set "POS_Y=20"
+if "%CHOICE%"=="2" goto ASK_TIME
+if "%CHOICE%"=="3" set "POS_X=20"
+if "%CHOICE%"=="3" set "POS_Y=h-text_h-20"
+if "%CHOICE%"=="3" goto ASK_TIME
+if "%CHOICE%"=="4" set "POS_X=w-text_w-20"
+if "%CHOICE%"=="4" set "POS_Y=h-text_h-20"
+if "%CHOICE%"=="4" goto ASK_TIME
+if "%CHOICE%"=="5" set "POS_X=(w-text_w)/2"
+if "%CHOICE%"=="5" set "POS_Y=(h-text_h)/2"
+if "%CHOICE%"=="5" goto ASK_TIME
 if "%CHOICE%"=="6" goto CUSTOM_POSITION
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
@@ -328,7 +338,14 @@ rem ============================================================
 :RUN
 cls
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_text%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=text"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto ASK_TEXT
+
+set "EDIT_ALLOW_AUDIO_COPY=1"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto ASK_TEXT
 
 echo ============================================================
 echo                    Добавление текста
@@ -350,9 +367,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%DRAWTEXT_FILTER%" ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a copy ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

@@ -49,8 +49,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat" & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\aac.bat"  & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\aac.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_MP4
 
@@ -75,8 +77,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"       & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\libmp3lame.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\libmp3lame.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_MP3
 
@@ -102,9 +106,12 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\libopus.bat"   & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "audio\libvorbis.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\libopus.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "audio\libvorbis.bat"
+if "%CHOICE%"=="3" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_WEBM
 
@@ -129,8 +136,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\libvorbis.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\libvorbis.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_OGV
 
@@ -156,9 +165,12 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\libvorbis.bat" & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "audio\libopus.bat"   & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\libvorbis.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "audio\libopus.bat"
+if "%CHOICE%"=="3" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_OGG
 
@@ -183,8 +195,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"    & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\libopus.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\libopus.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_OPUS
 
@@ -209,8 +223,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat" & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\flac.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\flac.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_FLAC
 
@@ -235,8 +251,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\pcm_s16le.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\pcm_s16le.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_WAV
 
@@ -266,13 +284,20 @@ set "CHOICE="
 set /p "CHOICE=Выберите аудиокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "audio\aac.bat"       & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "audio\libopus.bat"   & goto SUCCESS
-if "%CHOICE%"=="4" call :RunCodec "audio\libvorbis.bat" & goto SUCCESS
-if "%CHOICE%"=="5" call :RunCodec "audio\flac.bat"      & goto SUCCESS
-if "%CHOICE%"=="6" call :RunCodec "audio\pcm_s16le.bat" & goto SUCCESS
-if "%CHOICE%"=="7" call :RunCodec "audio\libmp3lame.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "audio\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "audio\aac.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "audio\libopus.bat"
+if "%CHOICE%"=="3" goto SUCCESS
+if "%CHOICE%"=="4" call :RunCodec "audio\libvorbis.bat"
+if "%CHOICE%"=="4" goto SUCCESS
+if "%CHOICE%"=="5" call :RunCodec "audio\flac.bat"
+if "%CHOICE%"=="5" goto SUCCESS
+if "%CHOICE%"=="6" call :RunCodec "audio\pcm_s16le.bat"
+if "%CHOICE%"=="6" goto SUCCESS
+if "%CHOICE%"=="7" call :RunCodec "audio\libmp3lame.bat"
+if "%CHOICE%"=="7" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_ANY
 

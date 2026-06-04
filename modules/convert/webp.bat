@@ -163,7 +163,10 @@ goto MAIN_MENU
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.webp"
+set "OUTPUT_EXT=webp"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 if "%LOSSLESS%"=="1" (
     set "WEBP_OPTIONS=-lossless 1 -compression_level 6"

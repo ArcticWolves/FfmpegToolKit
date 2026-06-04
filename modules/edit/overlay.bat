@@ -304,7 +304,14 @@ rem ============================================================
 :RUN
 cls
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_watermark%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=watermark"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
+
+set "EDIT_ALLOW_AUDIO_COPY=1"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto MAIN_MENU
 
 echo ============================================================
 echo                 Наложение водяного знака
@@ -347,9 +354,8 @@ pause >nul
 -filter_complex "%FILTER_COMPLEX%" ^
 -map 0:v ^
 -map 0:a? ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a copy ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 -shortest ^
 "%OUTPUT_FILE%"
 

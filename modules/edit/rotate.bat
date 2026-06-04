@@ -187,7 +187,14 @@ rem ============================================================
 :RUN
 cls
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SUFFIX%%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=%SUFFIX%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
+
+set "EDIT_ALLOW_AUDIO_COPY=1"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto MAIN_MENU
 
 echo ============================================================
 echo                    Поворот видео
@@ -208,9 +215,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%VIDEO_FILTER%" ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a copy ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

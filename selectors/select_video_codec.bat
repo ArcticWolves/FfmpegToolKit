@@ -46,11 +46,16 @@ set "CHOICE="
 set /p "CHOICE=Выберите видеокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"       & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "video\libopenh264.bat" & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "video\libkvazaar.bat"  & goto SUCCESS
-if "%CHOICE%"=="4" call :RunCodec "video\libaom-av1.bat"  & goto SUCCESS
-if "%CHOICE%"=="5" call :RunCodec "video\mpeg4.bat"       & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "video\libopenh264.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "video\libkvazaar.bat"
+if "%CHOICE%"=="3" goto SUCCESS
+if "%CHOICE%"=="4" call :RunCodec "video\libaom-av1.bat"
+if "%CHOICE%"=="4" goto SUCCESS
+if "%CHOICE%"=="5" call :RunCodec "video\mpeg4.bat"
+if "%CHOICE%"=="5" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_MP4
 
@@ -77,10 +82,14 @@ set "CHOICE="
 set /p "CHOICE=Выберите видеокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "video\libvpx-vp9.bat" & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "video\libvpx.bat"     & goto SUCCESS
-if "%CHOICE%"=="4" call :RunCodec "video\libaom-av1.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "video\libvpx-vp9.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "video\libvpx.bat"
+if "%CHOICE%"=="3" goto SUCCESS
+if "%CHOICE%"=="4" call :RunCodec "video\libaom-av1.bat"
+if "%CHOICE%"=="4" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_WEBM
 
@@ -105,8 +114,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите видеокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"      & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "video\libtheora.bat" & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "video\libtheora.bat"
+if "%CHOICE%"=="2" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_OGV
 
@@ -137,14 +148,22 @@ set "CHOICE="
 set /p "CHOICE=Выберите видеокодек: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"       & goto SUCCESS
-if "%CHOICE%"=="2" call :RunCodec "video\libopenh264.bat" & goto SUCCESS
-if "%CHOICE%"=="3" call :RunCodec "video\libkvazaar.bat"  & goto SUCCESS
-if "%CHOICE%"=="4" call :RunCodec "video\libvpx-vp9.bat"  & goto SUCCESS
-if "%CHOICE%"=="5" call :RunCodec "video\libvpx.bat"      & goto SUCCESS
-if "%CHOICE%"=="6" call :RunCodec "video\libaom-av1.bat"  & goto SUCCESS
-if "%CHOICE%"=="7" call :RunCodec "video\libtheora.bat"   & goto SUCCESS
-if "%CHOICE%"=="8" call :RunCodec "video\mpeg4.bat"       & goto SUCCESS
+if "%CHOICE%"=="1" call :RunCodec "video\copy.bat"
+if "%CHOICE%"=="1" goto SUCCESS
+if "%CHOICE%"=="2" call :RunCodec "video\libopenh264.bat"
+if "%CHOICE%"=="2" goto SUCCESS
+if "%CHOICE%"=="3" call :RunCodec "video\libkvazaar.bat"
+if "%CHOICE%"=="3" goto SUCCESS
+if "%CHOICE%"=="4" call :RunCodec "video\libvpx-vp9.bat"
+if "%CHOICE%"=="4" goto SUCCESS
+if "%CHOICE%"=="5" call :RunCodec "video\libvpx.bat"
+if "%CHOICE%"=="5" goto SUCCESS
+if "%CHOICE%"=="6" call :RunCodec "video\libaom-av1.bat"
+if "%CHOICE%"=="6" goto SUCCESS
+if "%CHOICE%"=="7" call :RunCodec "video\libtheora.bat"
+if "%CHOICE%"=="7" goto SUCCESS
+if "%CHOICE%"=="8" call :RunCodec "video\mpeg4.bat"
+if "%CHOICE%"=="8" goto SUCCESS
 if "%CHOICE%"=="0" goto CANCEL
 goto INVALID_ANY
 

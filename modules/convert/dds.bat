@@ -151,9 +151,12 @@ echo.
 set "FMT_CHOICE="
 set /p "FMT_CHOICE=Выберите формат: "
 
-if "%FMT_CHOICE%"=="1" set "PIX_FMT=rgba" & goto MAIN_MENU
-if "%FMT_CHOICE%"=="2" set "PIX_FMT=bgra" & goto MAIN_MENU
-if "%FMT_CHOICE%"=="3" set "PIX_FMT=rgb24" & goto MAIN_MENU
+if "%FMT_CHOICE%"=="1" set "PIX_FMT=rgba"
+if "%FMT_CHOICE%"=="1" goto MAIN_MENU
+if "%FMT_CHOICE%"=="2" set "PIX_FMT=bgra"
+if "%FMT_CHOICE%"=="2" goto MAIN_MENU
+if "%FMT_CHOICE%"=="3" set "PIX_FMT=rgb24"
+if "%FMT_CHOICE%"=="3" goto MAIN_MENU
 if "%FMT_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_PIXEL_FORMAT
@@ -162,7 +165,10 @@ goto SET_PIXEL_FORMAT
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.dds"
+set "OUTPUT_EXT=dds"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

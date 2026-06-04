@@ -170,7 +170,14 @@ for %%F in ("%INPUT_FILE%") do (
     set "INPUT_EXT=%%~xF"
 )
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_deshake%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=deshake"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
+
+set "EDIT_ALLOW_AUDIO_COPY=1"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto MAIN_MENU
 
 echo ============================================================
 echo                    Выполнение
@@ -189,9 +196,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%DESHAKE_FILTER%" ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a copy ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

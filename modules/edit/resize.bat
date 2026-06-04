@@ -101,11 +101,21 @@ echo.
 set "CHOICE="
 set /p "CHOICE=Выберите режим: "
 
-if "%CHOICE%"=="1" set "WIDTH=640"  & set "HEIGHT=480"  & goto BUILD_FILTER
-if "%CHOICE%"=="2" set "WIDTH=1280" & set "HEIGHT=720"  & goto BUILD_FILTER
-if "%CHOICE%"=="3" set "WIDTH=1920" & set "HEIGHT=1080" & goto BUILD_FILTER
-if "%CHOICE%"=="4" set "WIDTH=2560" & set "HEIGHT=1440" & goto BUILD_FILTER
-if "%CHOICE%"=="5" set "WIDTH=3840" & set "HEIGHT=2160" & goto BUILD_FILTER
+if "%CHOICE%"=="1" set "WIDTH=640"
+if "%CHOICE%"=="1" set "HEIGHT=480"
+if "%CHOICE%"=="1" goto BUILD_FILTER
+if "%CHOICE%"=="2" set "WIDTH=1280"
+if "%CHOICE%"=="2" set "HEIGHT=720"
+if "%CHOICE%"=="2" goto BUILD_FILTER
+if "%CHOICE%"=="3" set "WIDTH=1920"
+if "%CHOICE%"=="3" set "HEIGHT=1080"
+if "%CHOICE%"=="3" goto BUILD_FILTER
+if "%CHOICE%"=="4" set "WIDTH=2560"
+if "%CHOICE%"=="4" set "HEIGHT=1440"
+if "%CHOICE%"=="4" goto BUILD_FILTER
+if "%CHOICE%"=="5" set "WIDTH=3840"
+if "%CHOICE%"=="5" set "HEIGHT=2160"
+if "%CHOICE%"=="5" goto BUILD_FILTER
 if "%CHOICE%"=="6" goto CUSTOM_SIZE
 if "%CHOICE%"=="7" goto WIDTH_ONLY
 if "%CHOICE%"=="8" goto HEIGHT_ONLY
@@ -261,11 +271,16 @@ echo.
 set "FLAGS_CHOICE="
 set /p "FLAGS_CHOICE=Выберите алгоритм: "
 
-if "%FLAGS_CHOICE%"=="1" set "SCALE_FLAGS=bicubic"  & goto MAIN_MENU
-if "%FLAGS_CHOICE%"=="2" set "SCALE_FLAGS=bilinear" & goto MAIN_MENU
-if "%FLAGS_CHOICE%"=="3" set "SCALE_FLAGS=lanczos"  & goto MAIN_MENU
-if "%FLAGS_CHOICE%"=="4" set "SCALE_FLAGS=spline"   & goto MAIN_MENU
-if "%FLAGS_CHOICE%"=="5" set "SCALE_FLAGS=neighbor" & goto MAIN_MENU
+if "%FLAGS_CHOICE%"=="1" set "SCALE_FLAGS=bicubic"
+if "%FLAGS_CHOICE%"=="1" goto MAIN_MENU
+if "%FLAGS_CHOICE%"=="2" set "SCALE_FLAGS=bilinear"
+if "%FLAGS_CHOICE%"=="2" goto MAIN_MENU
+if "%FLAGS_CHOICE%"=="3" set "SCALE_FLAGS=lanczos"
+if "%FLAGS_CHOICE%"=="3" goto MAIN_MENU
+if "%FLAGS_CHOICE%"=="4" set "SCALE_FLAGS=spline"
+if "%FLAGS_CHOICE%"=="4" goto MAIN_MENU
+if "%FLAGS_CHOICE%"=="5" set "SCALE_FLAGS=neighbor"
+if "%FLAGS_CHOICE%"=="5" goto MAIN_MENU
 if "%FLAGS_CHOICE%"=="0" goto MAIN_MENU
 
 echo.
@@ -305,7 +320,14 @@ rem ============================================================
 :RUN
 cls
 
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_resized%INPUT_EXT%"
+set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_SUFFIX=resized"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
+
+set "EDIT_ALLOW_AUDIO_COPY=1"
+call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+if errorlevel 1 goto MAIN_MENU
 
 echo ============================================================
 echo                 Изменение размера
@@ -326,9 +348,8 @@ pause >nul
 "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
 -i "%INPUT_FILE%" ^
 -vf "%VIDEO_FILTER%" ^
--c:v libopenh264 ^
--b:v 5M ^
--c:a copy ^
+-c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+-c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

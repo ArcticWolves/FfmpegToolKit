@@ -150,12 +150,18 @@ echo.
 set "SIZE_CHOICE="
 set /p "SIZE_CHOICE=Выберите размер: "
 
-if "%SIZE_CHOICE%"=="1" set "ICON_SIZE=16"  & goto MAIN_MENU
-if "%SIZE_CHOICE%"=="2" set "ICON_SIZE=32"  & goto MAIN_MENU
-if "%SIZE_CHOICE%"=="3" set "ICON_SIZE=48"  & goto MAIN_MENU
-if "%SIZE_CHOICE%"=="4" set "ICON_SIZE=64"  & goto MAIN_MENU
-if "%SIZE_CHOICE%"=="5" set "ICON_SIZE=128" & goto MAIN_MENU
-if "%SIZE_CHOICE%"=="6" set "ICON_SIZE=256" & goto MAIN_MENU
+if "%SIZE_CHOICE%"=="1" set "ICON_SIZE=16"
+if "%SIZE_CHOICE%"=="1" goto MAIN_MENU
+if "%SIZE_CHOICE%"=="2" set "ICON_SIZE=32"
+if "%SIZE_CHOICE%"=="2" goto MAIN_MENU
+if "%SIZE_CHOICE%"=="3" set "ICON_SIZE=48"
+if "%SIZE_CHOICE%"=="3" goto MAIN_MENU
+if "%SIZE_CHOICE%"=="4" set "ICON_SIZE=64"
+if "%SIZE_CHOICE%"=="4" goto MAIN_MENU
+if "%SIZE_CHOICE%"=="5" set "ICON_SIZE=128"
+if "%SIZE_CHOICE%"=="5" goto MAIN_MENU
+if "%SIZE_CHOICE%"=="6" set "ICON_SIZE=256"
+if "%SIZE_CHOICE%"=="6" goto MAIN_MENU
 if "%SIZE_CHOICE%"=="7" goto CUSTOM_ICON_SIZE
 if "%SIZE_CHOICE%"=="0" goto MAIN_MENU
 
@@ -177,7 +183,10 @@ goto MAIN_MENU
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%ICON_SIZE%x%ICON_SIZE%.ico"
+set "OUTPUT_EXT=ico"
+set "OUTPUT_SUFFIX=%ICON_SIZE%x%ICON_SIZE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

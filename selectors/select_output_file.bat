@@ -47,8 +47,8 @@ set "CHOICE="
 set /p "CHOICE=Выберите вариант: "
 
 if not defined CHOICE goto CANCEL
-if "%CHOICE%"=="1" set "OUTPUT_NAME=%INPUT_NAME%" & goto BUILD_PATH
-if "%CHOICE%"=="2" set "OUTPUT_NAME=%INPUT_NAME%_%OUTPUT_SUFFIX%" & goto BUILD_PATH
+if "%CHOICE%"=="1" goto USE_INPUT_NAME
+if "%CHOICE%"=="2" goto USE_SUFFIX
 if "%CHOICE%"=="3" goto CUSTOM_NAME
 if "%CHOICE%"=="0" goto CANCEL
 
@@ -56,6 +56,14 @@ echo.
 echo [ERROR] Некорректный выбор.
 pause
 goto MAIN_MENU
+
+:USE_INPUT_NAME
+set "OUTPUT_NAME=%INPUT_NAME%"
+goto BUILD_PATH
+
+:USE_SUFFIX
+set "OUTPUT_NAME=%INPUT_NAME%_%OUTPUT_SUFFIX%"
+goto BUILD_PATH
 
 :CUSTOM_NAME
 echo.

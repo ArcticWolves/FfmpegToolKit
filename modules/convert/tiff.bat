@@ -157,10 +157,14 @@ echo.
 set "COMP_CHOICE="
 set /p "COMP_CHOICE=Выберите тип сжатия: "
 
-if "%COMP_CHOICE%"=="1" set "COMPRESSION=none"     & goto MAIN_MENU
-if "%COMP_CHOICE%"=="2" set "COMPRESSION=lzw"      & goto MAIN_MENU
-if "%COMP_CHOICE%"=="3" set "COMPRESSION=deflate"  & goto MAIN_MENU
-if "%COMP_CHOICE%"=="4" set "COMPRESSION=packbits" & goto MAIN_MENU
+if "%COMP_CHOICE%"=="1" set "COMPRESSION=none"
+if "%COMP_CHOICE%"=="1" goto MAIN_MENU
+if "%COMP_CHOICE%"=="2" set "COMPRESSION=lzw"
+if "%COMP_CHOICE%"=="2" goto MAIN_MENU
+if "%COMP_CHOICE%"=="3" set "COMPRESSION=deflate"
+if "%COMP_CHOICE%"=="3" goto MAIN_MENU
+if "%COMP_CHOICE%"=="4" set "COMPRESSION=packbits"
+if "%COMP_CHOICE%"=="4" goto MAIN_MENU
 if "%COMP_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_COMPRESSION
@@ -172,7 +176,10 @@ rem ============================================================
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.tiff"
+set "OUTPUT_EXT=tiff"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

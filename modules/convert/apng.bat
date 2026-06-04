@@ -184,7 +184,10 @@ goto MAIN_MENU
 :RUN
 set "SAFE_TIME=%START_TIME::=-%"
 set "SAFE_TIME=%SAFE_TIME:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIME%.apng"
+set "OUTPUT_EXT=apng"
+set "OUTPUT_SUFFIX=%SAFE_TIME%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 if "%WIDTH%"=="-1" (
     set "VIDEO_FILTER=fps=%FPS%"

@@ -142,8 +142,16 @@ for %%F in ("%INPUT_FILE%") do (
     set "EXTENSION=%%~xF"
 )
 
-set "OUTPUT_NAME=%BASE_NAME%_trim%EXTENSION%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%OUTPUT_NAME%"
+set "OUTPUT_EXT=%EXTENSION:~1%"
+set "OUTPUT_SUFFIX=trim"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto EXIT_MODULE
+
+if "%USE_COPY%"=="0" (
+    set "EDIT_ALLOW_AUDIO_COPY=1"
+    call "%SELECTORS_DIR%\select_edit_encode_profile.bat"
+    if errorlevel 1 goto EXIT_MODULE
+)
 
 
 :: ------------------------------------------------------------
@@ -202,6 +210,8 @@ if "%USE_COPY%"=="1" (
         -ss %START_TIME% ^
         -to %END_TIME% ^
         -i "%INPUT_FILE%" ^
+        -c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
+        -c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^
         "%OUTPUT_FILE%"
 )
 

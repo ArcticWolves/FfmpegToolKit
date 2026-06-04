@@ -150,7 +150,10 @@ goto MAIN_MENU
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.jp2"
+set "OUTPUT_EXT=jp2"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

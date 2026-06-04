@@ -83,6 +83,8 @@ for %%F in ("%INPUT_FILE%") do (
 
 set "PALETTE_FILE=%PALETTES_DIR%\%INPUT_NAME%_palette.png"
 set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%.gif"
+set "OUTPUT_EXT=gif"
+set "OUTPUT_SUFFIX=gif"
 
 rem ------------------------------------------------------------
 rem Значения по умолчанию
@@ -233,6 +235,9 @@ goto MAIN_MENU
 
 :CREATE_GIF
 cls
+
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 rem ------------------------------------------------------------
 rem Формирование опций времени

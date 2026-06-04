@@ -34,18 +34,13 @@ echo                    Стабилизация видео
 echo ============================================================
 echo.
 echo  1. Deshake
-if "%HAS_VIDSTAB%"=="1" (
-    echo  2. VidStab (Автоматическая стабилизация)
-) else (
-    echo  2. VidStab (недоступен в текущей сборке FFmpeg)
-)
-echo.
-if "%HAS_VIDSTAB%"=="1" (
-    echo  3. VidStab Detect    [Служебный режим]
-    echo  4. VidStab Transform [Служебный режим]
-) else (
-    echo  3. VidStab Detect    [недоступен]
-    echo  4. VidStab Transform [недоступен]
+if "%HAS_VIDSTAB%"=="1" echo  2. VidStab ^(Автоматическая стабилизация^)
+if "%HAS_VIDSTAB%"=="1" echo  3. VidStab Detect    [Служебный режим]
+if "%HAS_VIDSTAB%"=="1" echo  4. VidStab Transform [Служебный режим]
+if not "%HAS_VIDSTAB%"=="1" (
+    echo.
+    echo VidStab недоступен в текущей сборке FFmpeg.
+    echo Доступен только Deshake.
 )
 echo.
 echo  0. Назад

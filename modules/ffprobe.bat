@@ -77,23 +77,40 @@ if not exist "%INPUT%" (
 
 if "%CHOICE%"=="1" goto SHOW_REPORT
 if "%CHOICE%"=="2" goto SHOW_FULL_JSON
-if "%CHOICE%"=="3" call :DisplayResult "Container Format" "format_name"        "format"         & goto MAIN_MENU
-if "%CHOICE%"=="4" call :DisplayResult "Duration (seconds)" "duration"         "format"         & goto MAIN_MENU
-if "%CHOICE%"=="5" call :DisplayResult "File Size (bytes)" "size"              "format"         & goto MAIN_MENU
-if "%CHOICE%"=="6" call :DisplayResult "Bitrate"          "bit_rate"           "format"         & goto MAIN_MENU
-if "%CHOICE%"=="7" call :DisplayResult "Video Codec"      "codec_name"         "stream_v"       & goto MAIN_MENU
-if "%CHOICE%"=="8" call :DisplayResult "Audio Codec"      "codec_name"         "stream_a"       & goto MAIN_MENU
-if "%CHOICE%"=="9" call :DisplayResult "Subtitle Codec"   "codec_name"         "stream_s"       & goto MAIN_MENU
-if "%CHOICE%"=="10" call :DisplayResolution                                                   & goto MAIN_MENU
-if "%CHOICE%"=="11" call :DisplayResult "FPS"             "avg_frame_rate"     "stream_v"       & goto MAIN_MENU
-if "%CHOICE%"=="12" call :DisplayResult "Pixel Format"    "pix_fmt"            "stream_v"       & goto MAIN_MENU
-if "%CHOICE%"=="13" call :DisplayFrameCount                                                   & goto MAIN_MENU
-if "%CHOICE%"=="14" call :DisplayResult "Audio Channels"  "channels"           "stream_a"       & goto MAIN_MENU
-if "%CHOICE%"=="15" call :DisplayResult "Sample Rate"     "sample_rate"        "stream_a"       & goto MAIN_MENU
-if "%CHOICE%"=="16" call :DisplayResult "Audio Language"  "language"           "stream_tag_a"   & goto MAIN_MENU
-if "%CHOICE%"=="17" call :DisplayPresence "Has Video"     "v"                  & goto MAIN_MENU
-if "%CHOICE%"=="18" call :DisplayPresence "Has Audio"     "a"                  & goto MAIN_MENU
-if "%CHOICE%"=="19" call :DisplayPresence "Has Subtitles" "s"                  & goto MAIN_MENU
+if "%CHOICE%"=="3" call :DisplayResult "Container Format" "format_name"        "format"
+if "%CHOICE%"=="3" goto MAIN_MENU
+if "%CHOICE%"=="4" call :DisplayResult "Duration (seconds)" "duration"         "format"
+if "%CHOICE%"=="4" goto MAIN_MENU
+if "%CHOICE%"=="5" call :DisplayResult "File Size (bytes)" "size"              "format"
+if "%CHOICE%"=="5" goto MAIN_MENU
+if "%CHOICE%"=="6" call :DisplayResult "Bitrate"          "bit_rate"           "format"
+if "%CHOICE%"=="6" goto MAIN_MENU
+if "%CHOICE%"=="7" call :DisplayResult "Video Codec"      "codec_name"         "stream_v"
+if "%CHOICE%"=="7" goto MAIN_MENU
+if "%CHOICE%"=="8" call :DisplayResult "Audio Codec"      "codec_name"         "stream_a"
+if "%CHOICE%"=="8" goto MAIN_MENU
+if "%CHOICE%"=="9" call :DisplayResult "Subtitle Codec"   "codec_name"         "stream_s"
+if "%CHOICE%"=="9" goto MAIN_MENU
+if "%CHOICE%"=="10" call :DisplayResolution
+if "%CHOICE%"=="10" goto MAIN_MENU
+if "%CHOICE%"=="11" call :DisplayResult "FPS"             "avg_frame_rate"     "stream_v"
+if "%CHOICE%"=="11" goto MAIN_MENU
+if "%CHOICE%"=="12" call :DisplayResult "Pixel Format"    "pix_fmt"            "stream_v"
+if "%CHOICE%"=="12" goto MAIN_MENU
+if "%CHOICE%"=="13" call :DisplayFrameCount
+if "%CHOICE%"=="13" goto MAIN_MENU
+if "%CHOICE%"=="14" call :DisplayResult "Audio Channels"  "channels"           "stream_a"
+if "%CHOICE%"=="14" goto MAIN_MENU
+if "%CHOICE%"=="15" call :DisplayResult "Sample Rate"     "sample_rate"        "stream_a"
+if "%CHOICE%"=="15" goto MAIN_MENU
+if "%CHOICE%"=="16" call :DisplayResult "Audio Language"  "language"           "stream_tag_a"
+if "%CHOICE%"=="16" goto MAIN_MENU
+if "%CHOICE%"=="17" call :DisplayPresence "Has Video"     "v"
+if "%CHOICE%"=="17" goto MAIN_MENU
+if "%CHOICE%"=="18" call :DisplayPresence "Has Audio"     "a"
+if "%CHOICE%"=="18" goto MAIN_MENU
+if "%CHOICE%"=="19" call :DisplayPresence "Has Subtitles" "s"
+if "%CHOICE%"=="19" goto MAIN_MENU
 
 echo.
 echo [ERROR] Некорректный выбор.

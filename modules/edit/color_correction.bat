@@ -45,8 +45,8 @@ echo.
 set "CHOICE="
 set /p "CHOICE=Выберите фильтр: "
 
-if "%CHOICE%"=="1" call :RunModule "edit\filters\color_equalizer.bat"
-if "%CHOICE%"=="2" call :RunModule "edit\filters\color_hue.bat"
+if "%CHOICE%"=="1" goto MENU_EQUALIZER
+if "%CHOICE%"=="2" goto MENU_HUE
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
 if not "%CHOICE%"=="1" if not "%CHOICE%"=="2" (
@@ -56,6 +56,16 @@ if not "%CHOICE%"=="1" if not "%CHOICE%"=="2" (
     pause
 )
 
+goto MAIN_MENU
+
+
+:MENU_EQUALIZER
+call :RunModule "edit\filters\color_equalizer.bat"
+goto MAIN_MENU
+
+
+:MENU_HUE
+call :RunModule "edit\filters\color_hue.bat"
 goto MAIN_MENU
 
 

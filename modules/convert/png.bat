@@ -59,8 +59,6 @@ for %%F in ("%INPUT_FILE%") do (
 rem ------------------------------------------------------------
 rem Значения по умолчанию
 rem ------------------------------------------------------------
-set "VIDEO_CODEC=png"
-set "VIDEO_CODEC_OPTIONS="
 set "TIMECODE=00:00:00"
 
 :MAIN_MENU
@@ -76,15 +74,10 @@ echo.
 echo Таймкод:
 echo   %TIMECODE%
 echo.
-echo Видеокодек:
-echo   %VIDEO_CODEC%
-if defined VIDEO_CODEC_OPTIONS echo   %VIDEO_CODEC_OPTIONS%
-echo.
 echo ============================================================
 echo.
 echo  1. Указать таймкод
-echo  2. Выбрать видеокодек
-echo  3. Извлечь кадр
+echo  2. Извлечь кадр
 echo.
 echo  0. Назад
 echo.
@@ -95,8 +88,7 @@ set "CHOICE="
 set /p "CHOICE=Выберите действие: "
 
 if "%CHOICE%"=="1" goto SET_TIMECODE
-if "%CHOICE%"=="2" goto SELECT_VIDEO_CODEC
-if "%CHOICE%"=="3" goto RUN
+if "%CHOICE%"=="2" goto RUN
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
@@ -135,32 +127,15 @@ goto MAIN_MENU
 
 
 rem ============================================================
-rem Выбор видеокодека
-rem ============================================================
-:SELECT_VIDEO_CODEC
-if exist "%ROOT%\selectors\select_video_codec.bat" (
-    call "%ROOT%\selectors\select_video_codec.bat"
-) else (
-    echo.
-    echo [ERROR] Не найден селектор:
-    echo         %ROOT%\selectors\select_video_codec.bat
-    echo.
-    pause
-)
-
-if not defined VIDEO_CODEC (
-    set "VIDEO_CODEC=png"
-)
-
-goto MAIN_MENU
-
-
-rem ============================================================
 rem Извлечение кадра
 rem ============================================================
 :RUN
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%TIMECODE::=-%.png"
-set "OUTPUT_FILE=%OUTPUT_FILE:.=-%"
+set "SAFE_TIMECODE=%TIMECODE::=-%"
+set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
+set "OUTPUT_EXT=png"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================
@@ -182,7 +157,7 @@ pause >nul
 -ss %TIMECODE% ^
 -i "%INPUT_FILE%" ^
 -frames:v 1 ^
--c:v %VIDEO_CODEC% %VIDEO_CODEC_OPTIONS% ^
+-c:v png ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

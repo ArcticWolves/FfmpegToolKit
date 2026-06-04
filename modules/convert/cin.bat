@@ -157,9 +157,12 @@ echo.
 set "FMT_CHOICE="
 set /p "FMT_CHOICE=Выберите формат: "
 
-if "%FMT_CHOICE%"=="1" set "PIX_FMT=gbrp10le" & goto MAIN_MENU
-if "%FMT_CHOICE%"=="2" set "PIX_FMT=rgb48le"  & goto MAIN_MENU
-if "%FMT_CHOICE%"=="3" set "PIX_FMT=rgb24"    & goto MAIN_MENU
+if "%FMT_CHOICE%"=="1" set "PIX_FMT=gbrp10le"
+if "%FMT_CHOICE%"=="1" goto MAIN_MENU
+if "%FMT_CHOICE%"=="2" set "PIX_FMT=rgb48le"
+if "%FMT_CHOICE%"=="2" goto MAIN_MENU
+if "%FMT_CHOICE%"=="3" set "PIX_FMT=rgb24"
+if "%FMT_CHOICE%"=="3" goto MAIN_MENU
 if "%FMT_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_PIXEL_FORMAT
@@ -168,7 +171,10 @@ goto SET_PIXEL_FORMAT
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.cin"
+set "OUTPUT_EXT=cin"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================
