@@ -41,6 +41,7 @@ echo.
 echo  1. Редактировать
 echo  2. Извлечь
 echo  3. Конвертировать
+echo  4. Пакетная конвертация
 echo.
 echo  0. Назад
 echo.
@@ -53,6 +54,7 @@ set /p "CHOICE=Выберите действие: "
 if "%CHOICE%"=="1" goto MENU_EDIT
 if "%CHOICE%"=="2" goto MENU_EXTRACT
 if "%CHOICE%"=="3" goto MENU_CONVERT
+if "%CHOICE%"=="4" goto MENU_BATCH
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
 echo.
@@ -83,6 +85,14 @@ goto MAIN_MENU
 :: ============================================================
 :MENU_CONVERT
 call :RunModule "convert.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: Пакетная конвертация
+:: ============================================================
+:MENU_BATCH
+call :RunModule "batch.bat"
 goto MAIN_MENU
 
 

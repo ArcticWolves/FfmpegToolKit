@@ -154,11 +154,16 @@ echo.
 set "COMP_CHOICE="
 set /p "COMP_CHOICE=Выберите compression: "
 
-if "%COMP_CHOICE%"=="1" set "COMPRESSION=none"  & goto MAIN_MENU
-if "%COMP_CHOICE%"=="2" set "COMPRESSION=rle"   & goto MAIN_MENU
-if "%COMP_CHOICE%"=="3" set "COMPRESSION=zip"   & goto MAIN_MENU
-if "%COMP_CHOICE%"=="4" set "COMPRESSION=piz"   & goto MAIN_MENU
-if "%COMP_CHOICE%"=="5" set "COMPRESSION=pxr24" & goto MAIN_MENU
+if "%COMP_CHOICE%"=="1" set "COMPRESSION=none"
+if "%COMP_CHOICE%"=="1" goto MAIN_MENU
+if "%COMP_CHOICE%"=="2" set "COMPRESSION=rle"
+if "%COMP_CHOICE%"=="2" goto MAIN_MENU
+if "%COMP_CHOICE%"=="3" set "COMPRESSION=zip"
+if "%COMP_CHOICE%"=="3" goto MAIN_MENU
+if "%COMP_CHOICE%"=="4" set "COMPRESSION=piz"
+if "%COMP_CHOICE%"=="4" goto MAIN_MENU
+if "%COMP_CHOICE%"=="5" set "COMPRESSION=pxr24"
+if "%COMP_CHOICE%"=="5" goto MAIN_MENU
 if "%COMP_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_COMPRESSION
@@ -184,10 +189,14 @@ echo.
 set "FMT_CHOICE="
 set /p "FMT_CHOICE=Выберите формат: "
 
-if "%FMT_CHOICE%"=="1" set "PIX_FMT=gbrpf32le"  & goto MAIN_MENU
-if "%FMT_CHOICE%"=="2" set "PIX_FMT=gbrapf32le" & goto MAIN_MENU
-if "%FMT_CHOICE%"=="3" set "PIX_FMT=gbrpf16le"  & goto MAIN_MENU
-if "%FMT_CHOICE%"=="4" set "PIX_FMT=gbrapf16le" & goto MAIN_MENU
+if "%FMT_CHOICE%"=="1" set "PIX_FMT=gbrpf32le"
+if "%FMT_CHOICE%"=="1" goto MAIN_MENU
+if "%FMT_CHOICE%"=="2" set "PIX_FMT=gbrapf32le"
+if "%FMT_CHOICE%"=="2" goto MAIN_MENU
+if "%FMT_CHOICE%"=="3" set "PIX_FMT=gbrpf16le"
+if "%FMT_CHOICE%"=="3" goto MAIN_MENU
+if "%FMT_CHOICE%"=="4" set "PIX_FMT=gbrapf16le"
+if "%FMT_CHOICE%"=="4" goto MAIN_MENU
 if "%FMT_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_PIXEL_FORMAT
@@ -196,7 +205,10 @@ goto SET_PIXEL_FORMAT
 :RUN
 set "SAFE_TIMECODE=%TIMECODE::=-%"
 set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%_%SAFE_TIMECODE%.exr"
+set "OUTPUT_EXT=exr"
+set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
+call "%SELECTORS_DIR%\select_output_file.bat"
+if errorlevel 1 goto MAIN_MENU
 
 cls
 echo ============================================================

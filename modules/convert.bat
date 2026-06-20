@@ -67,6 +67,8 @@ echo 27. PGM
 echo 28. PPM
 echo 29. PSD
 echo 30. CIN
+echo 31. EXR
+echo 32. PNM
 echo.
 echo  0. Назад
 echo.
@@ -76,46 +78,51 @@ echo.
 set "CHOICE="
 set /p "CHOICE=Выберите формат: "
 
-set "HANDLED=0"
+if "%CHOICE%"=="0" goto EXIT_MODULE
 
-if "%CHOICE%"=="1"  set "HANDLED=1" & call :OpenModule "convert\mp4_h264.bat"
-if "%CHOICE%"=="2"  set "HANDLED=1" & call :OpenModule "convert\mp4_h265.bat"
-if "%CHOICE%"=="3"  set "HANDLED=1" & call :OpenModule "convert\webm_vp9.bat"
-if "%CHOICE%"=="4"  set "HANDLED=1" & call :OpenModule "convert\ogv.bat"
-if "%CHOICE%"=="5"  set "HANDLED=1" & call :OpenModule "convert\gif.bat"
-if "%CHOICE%"=="6"  set "HANDLED=1" & call :OpenModule "convert\apng.bat"
-if "%CHOICE%"=="7"  set "HANDLED=1" & call :OpenModule "convert\mp3.bat"
-if "%CHOICE%"=="8"  set "HANDLED=1" & call :OpenModule "convert\wav.bat"
-if "%CHOICE%"=="9"  set "HANDLED=1" & call :OpenModule "convert\flac.bat"
-if "%CHOICE%"=="10" set "HANDLED=1" & call :OpenModule "convert\opus.bat"
-if "%CHOICE%"=="11" set "HANDLED=1" & call :OpenModule "convert\aac.bat"
-if "%CHOICE%"=="12" set "HANDLED=1" & call :OpenModule "convert\ogg.bat"
-if "%CHOICE%"=="13" set "HANDLED=1" & call :OpenModule "convert\png.bat"
-if "%CHOICE%"=="14" set "HANDLED=1" & call :OpenModule "convert\jpeg.bat"
-if "%CHOICE%"=="15" set "HANDLED=1" & call :OpenModule "convert\webp.bat"
-if "%CHOICE%"=="16" set "HANDLED=1" & call :OpenModule "convert\avif.bat"
-if "%CHOICE%"=="17" set "HANDLED=1" & call :OpenModule "convert\tiff.bat"
-if "%CHOICE%"=="18" set "HANDLED=1" & call :OpenModule "convert\bmp.bat"
-if "%CHOICE%"=="19" set "HANDLED=1" & call :OpenModule "convert\ico.bat"
-if "%CHOICE%"=="20" set "HANDLED=1" & call :OpenModule "convert\dpx.bat"
-if "%CHOICE%"=="21" set "HANDLED=1" & call :OpenModule "convert\dds.bat"
-if "%CHOICE%"=="22" set "HANDLED=1" & call :OpenModule "convert\hdr.bat"
-if "%CHOICE%"=="23" set "HANDLED=1" & call :OpenModule "convert\jp2.bat"
-if "%CHOICE%"=="24" set "HANDLED=1" & call :OpenModule "convert\jxl.bat"
-if "%CHOICE%"=="25" set "HANDLED=1" & call :OpenModule "convert\pam.bat"
-if "%CHOICE%"=="26" set "HANDLED=1" & call :OpenModule "convert\pbm.bat"
-if "%CHOICE%"=="27" set "HANDLED=1" & call :OpenModule "convert\pgm.bat"
-if "%CHOICE%"=="28" set "HANDLED=1" & call :OpenModule "convert\ppm.bat"
-if "%CHOICE%"=="29" set "HANDLED=1" & call :OpenModule "convert\psd.bat"
-if "%CHOICE%"=="30" set "HANDLED=1" & call :OpenModule "convert\cin.bat"
-if "%CHOICE%"=="0"  goto EXIT_MODULE
+set "MODULE_REL="
+if "%CHOICE%"=="1"  set "MODULE_REL=convert\mp4_h264.bat"
+if "%CHOICE%"=="2"  set "MODULE_REL=convert\mp4_h265.bat"
+if "%CHOICE%"=="3"  set "MODULE_REL=convert\webm_vp9.bat"
+if "%CHOICE%"=="4"  set "MODULE_REL=convert\ogv.bat"
+if "%CHOICE%"=="5"  set "MODULE_REL=convert\gif.bat"
+if "%CHOICE%"=="6"  set "MODULE_REL=convert\apng.bat"
+if "%CHOICE%"=="7"  set "MODULE_REL=convert\mp3.bat"
+if "%CHOICE%"=="8"  set "MODULE_REL=convert\wav.bat"
+if "%CHOICE%"=="9"  set "MODULE_REL=convert\flac.bat"
+if "%CHOICE%"=="10" set "MODULE_REL=convert\opus.bat"
+if "%CHOICE%"=="11" set "MODULE_REL=convert\aac.bat"
+if "%CHOICE%"=="12" set "MODULE_REL=convert\ogg.bat"
+if "%CHOICE%"=="13" set "MODULE_REL=convert\png.bat"
+if "%CHOICE%"=="14" set "MODULE_REL=convert\jpeg.bat"
+if "%CHOICE%"=="15" set "MODULE_REL=convert\webp.bat"
+if "%CHOICE%"=="16" set "MODULE_REL=convert\avif.bat"
+if "%CHOICE%"=="17" set "MODULE_REL=convert\tiff.bat"
+if "%CHOICE%"=="18" set "MODULE_REL=convert\bmp.bat"
+if "%CHOICE%"=="19" set "MODULE_REL=convert\ico.bat"
+if "%CHOICE%"=="20" set "MODULE_REL=convert\dpx.bat"
+if "%CHOICE%"=="21" set "MODULE_REL=convert\dds.bat"
+if "%CHOICE%"=="22" set "MODULE_REL=convert\hdr.bat"
+if "%CHOICE%"=="23" set "MODULE_REL=convert\jp2.bat"
+if "%CHOICE%"=="24" set "MODULE_REL=convert\jxl.bat"
+if "%CHOICE%"=="25" set "MODULE_REL=convert\pam.bat"
+if "%CHOICE%"=="26" set "MODULE_REL=convert\pbm.bat"
+if "%CHOICE%"=="27" set "MODULE_REL=convert\pgm.bat"
+if "%CHOICE%"=="28" set "MODULE_REL=convert\ppm.bat"
+if "%CHOICE%"=="29" set "MODULE_REL=convert\psd.bat"
+if "%CHOICE%"=="30" set "MODULE_REL=convert\cin.bat"
+if "%CHOICE%"=="31" set "MODULE_REL=convert\exr.bat"
+if "%CHOICE%"=="32" set "MODULE_REL=convert\pnm.bat"
 
-if "%HANDLED%"=="0" (
-    echo.
-    echo [ERROR] Некорректный выбор.
-    echo.
-    pause
+if defined MODULE_REL (
+    call :OpenModule "%MODULE_REL%"
+    goto MAIN_MENU
 )
+
+echo.
+echo [ERROR] Некорректный выбор.
+echo.
+pause
 
 goto MAIN_MENU
 

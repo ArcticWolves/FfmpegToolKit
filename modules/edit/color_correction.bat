@@ -10,6 +10,7 @@ chcp 65001 >nul
 :: Доступные фильтры:
 ::   1. eq  - яркость, контраст, насыщенность, гамма
 ::   2. hue - оттенок и насыщенность
+::   3. lut3d - 3D LUT
 ::
 :: Архитектурная роль:
 ::   Controller для фильтров цветокоррекции.
@@ -36,6 +37,7 @@ echo ============================================================
 echo.
 echo  1. Equalizer (eq) - яркость, контраст, насыщенность, гамма
 echo  2. Hue (hue)      - оттенок и насыщенность
+echo  3. LUT (lut3d)    - применить 3D LUT
 echo.
 echo  0. Назад
 echo.
@@ -47,9 +49,10 @@ set /p "CHOICE=Выберите фильтр: "
 
 if "%CHOICE%"=="1" goto MENU_EQUALIZER
 if "%CHOICE%"=="2" goto MENU_HUE
+if "%CHOICE%"=="3" goto MENU_LUT
 if "%CHOICE%"=="0" goto EXIT_MODULE
 
-if not "%CHOICE%"=="1" if not "%CHOICE%"=="2" (
+if not "%CHOICE%"=="1" if not "%CHOICE%"=="2" if not "%CHOICE%"=="3" (
     echo.
     echo [ERROR] Некорректный выбор.
     echo.
@@ -66,6 +69,11 @@ goto MAIN_MENU
 
 :MENU_HUE
 call :RunModule "edit\filters\color_hue.bat"
+goto MAIN_MENU
+
+
+:MENU_LUT
+call :RunModule "edit\filters\lut.bat"
 goto MAIN_MENU
 
 

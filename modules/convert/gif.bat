@@ -82,7 +82,6 @@ for %%F in ("%INPUT_FILE%") do (
 )
 
 set "PALETTE_FILE=%PALETTES_DIR%\%INPUT_NAME%_palette.png"
-set "OUTPUT_FILE=%OUTPUT_DIR%\%INPUT_NAME%.gif"
 set "OUTPUT_EXT=gif"
 set "OUTPUT_SUFFIX=gif"
 

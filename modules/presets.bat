@@ -19,6 +19,7 @@ echo.
 
 set /p CHOICE=Select preset:
 
+if not defined CHOICE exit /b 1
 if "%CHOICE%"=="1" goto PRESET_MP3
 if "%CHOICE%"=="2" goto PRESET_WAV
 if "%CHOICE%"=="3" goto PRESET_FLAC

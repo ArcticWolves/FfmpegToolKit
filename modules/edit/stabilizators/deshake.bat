@@ -95,15 +95,18 @@ rem Пресеты
 rem ============================================================
 
 :PRESET_FAST
-set "DESHAKE_FILTER=deshake=rx=8:ry=8:search=less:edge=mirror:blocksize=8"
+call "%PRESETS_DIR%\stabilizators\deshake_presset.bat" fast
+if errorlevel 1 goto MAIN_MENU
 goto RUN
 
 :PRESET_STANDARD
-set "DESHAKE_FILTER=deshake=rx=16:ry=16:edge=mirror:blocksize=8"
+call "%PRESETS_DIR%\stabilizators\deshake_presset.bat" standard
+if errorlevel 1 goto MAIN_MENU
 goto RUN
 
 :PRESET_STRONG
-set "DESHAKE_FILTER=deshake=rx=32:ry=32:search=exhaustive:edge=mirror:blocksize=8"
+call "%PRESETS_DIR%\stabilizators\deshake_presset.bat" strong
+if errorlevel 1 goto MAIN_MENU
 goto RUN
 
 
