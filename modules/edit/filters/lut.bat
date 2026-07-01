@@ -35,7 +35,9 @@ if errorlevel 1 goto EXIT_MODULE
 
 if not defined SELECTED_LUT goto EXIT_MODULE
 
-set "VIDEO_FILTER=lut3d='%SELECTED_LUT%'"
+set "LUT_FILTER_PATH=%SELECTED_LUT:\=/%"
+set "LUT_FILTER_PATH=%LUT_FILTER_PATH::=\:%"
+set "VIDEO_FILTER=lut3d=file='%LUT_FILTER_PATH%'"
 
 set "OUTPUT_EXT=%INPUT_EXT:~1%"
 set "OUTPUT_SUFFIX=lut"

@@ -48,6 +48,8 @@ echo.
 echo  1. Проигрыватель  (FFplay)
 echo  2. Анализатор     (FFprobe)
 echo  3. Обработка      (FFmpeg)
+echo  4. Информация     (FFmpeg build)
+echo  5. Поиск          (кодеки / фильтры)
 echo.
 echo  0. Выход
 echo.
@@ -60,6 +62,8 @@ set /p "CHOICE=Выберите действие: "
 if "%CHOICE%"=="1" goto MENU_FFPLAY
 if "%CHOICE%"=="2" goto MENU_FFPROBE
 if "%CHOICE%"=="3" goto MENU_FFMPEG
+if "%CHOICE%"=="4" goto MENU_INFO
+if "%CHOICE%"=="5" goto MENU_SEARCH
 if "%CHOICE%"=="0" goto EXIT_APP
 
 echo.
@@ -99,6 +103,22 @@ goto MAIN_MENU
 :: ============================================================
 :MENU_FFMPEG
 call :RunModule "ffmpeg.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: INFO
+:: ============================================================
+:MENU_INFO
+call :RunModule "info.bat"
+goto MAIN_MENU
+
+
+:: ============================================================
+:: SEARCH
+:: ============================================================
+:MENU_SEARCH
+call :RunModule "search.bat"
 goto MAIN_MENU
 
 

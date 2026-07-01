@@ -103,9 +103,7 @@ set /p "SAVE_LOG=Сохранить вывод в logs? (Y/N): "
 
 if /i "%SAVE_LOG%"=="Y" (
     rem Формирование временной метки
-    for /f %%I in ('
-        powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm-ss"
-    ') do (
+    for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm-ss"') do (
         set "TIMESTAMP=%%I"
     )
 

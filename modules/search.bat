@@ -1,5 +1,12 @@
 @echo off
-cls
+setlocal EnableExtensions
+chcp 65001 >nul
+
+rem ============================================================
+rem modules\search.bat
+rem
+rem Search codecs, encoders, decoders and filters in current FFmpeg build.
+rem ============================================================
 
 if not defined CONFIG_LOADED (
     echo.
@@ -10,24 +17,45 @@ if not defined CONFIG_LOADED (
     exit /b 1
 )
 
-set /p QUERY=Введите строку поиска:
+:MAIN_MENU
+cls
+echo ============================================================
+echo                         Поиск
+echo ============================================================
+echo.
+echo Поиск выполняется по codec / encoder / decoder / filter.
+echo.
+echo  0. Назад
+echo.
+echo ============================================================
+echo.
+
+set "QUERY="
+set /p "QUERY=Введите строку поиска: "
+
+if not defined QUERY goto EXIT_MODULE
+if "%QUERY%"=="0" goto EXIT_MODULE
 
 echo.
 echo ===== Codecs =====
-"%FFMPEG%" -codecs | findstr /i "%QUERY%"
+"%FFMPEG%" -hide_banner -codecs | findstr /i /c:"%QUERY%"
 
 echo.
 echo ===== Encoders =====
-"%FFMPEG%" -encoders | findstr /i "%QUERY%"
+"%FFMPEG%" -hide_banner -encoders | findstr /i /c:"%QUERY%"
 
 echo.
 echo ===== Decoders =====
-"%FFMPEG%" -decoders | findstr /i "%QUERY%"
+"%FFMPEG%" -hide_banner -decoders | findstr /i /c:"%QUERY%"
 
 echo.
 echo ===== Filters =====
-"%FFMPEG%" -filters | findstr /i "%QUERY%"
+"%FFMPEG%" -hide_banner -filters | findstr /i /c:"%QUERY%"
 
 echo.
 pause
-exit /b
+goto MAIN_MENU
+
+:EXIT_MODULE
+endlocal
+exit /b 0

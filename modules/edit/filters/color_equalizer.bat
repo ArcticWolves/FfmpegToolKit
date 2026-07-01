@@ -5,7 +5,7 @@ chcp 65001 >nul
 :: ============================================================
 :: modules\edit\filters\color_equalizer.bat
 ::
-:: FFmpeg eq filter: brightness, contrast, saturation, gamma.
+:: FFmpeg huesaturation filter: intensity and saturation.
 :: ============================================================
 
 if not defined CONFIG_LOADED (
@@ -33,29 +33,25 @@ for %%F in ("%INPUT_FILE%") do (
 :MAIN_MENU
 cls
 echo ============================================================
-echo                   Equalizer / EQ
+echo                   Color Adjust
 echo ============================================================
 echo.
-echo Значения по умолчанию не меняют изображение.
+echo Используется фильтр huesaturation, доступный в текущей сборке FFmpeg.
 echo.
 
-set "BRIGHTNESS="
-set /p "BRIGHTNESS=Яркость [-1.0..1.0, 0.0]: "
-if not defined BRIGHTNESS set "BRIGHTNESS=0.0"
+set "INTENSITY="
+set /p "INTENSITY=Интенсивность/яркость [-1.0..1.0, 0.0]: "
+if not defined INTENSITY set "INTENSITY=0.0"
 
-set "CONTRAST="
-set /p "CONTRAST=Контраст [1.0]: "
-if not defined CONTRAST set "CONTRAST=1.0"
+set "SATURATION_SHIFT="
+set /p "SATURATION_SHIFT=Сдвиг насыщенности [-1.0..1.0, 0.0]: "
+if not defined SATURATION_SHIFT set "SATURATION_SHIFT=0.0"
 
-set "SATURATION="
-set /p "SATURATION=Насыщенность [1.0]: "
-if not defined SATURATION set "SATURATION=1.0"
+set "STRENGTH="
+set /p "STRENGTH=Сила фильтра [1.0]: "
+if not defined STRENGTH set "STRENGTH=1.0"
 
-set "GAMMA="
-set /p "GAMMA=Гамма [1.0]: "
-if not defined GAMMA set "GAMMA=1.0"
-
-set "VIDEO_FILTER=eq=brightness=%BRIGHTNESS%:contrast=%CONTRAST%:saturation=%SATURATION%:gamma=%GAMMA%"
+set "VIDEO_FILTER=huesaturation=intensity=%INTENSITY%:saturation=%SATURATION_SHIFT%:strength=%STRENGTH%"
 
 set "OUTPUT_EXT=%INPUT_EXT:~1%"
 set "OUTPUT_SUFFIX=eq"
@@ -68,7 +64,7 @@ if errorlevel 1 goto EXIT_MODULE
 
 cls
 echo ============================================================
-echo                   Equalizer / EQ
+echo                   Color Adjust
 echo ============================================================
 echo.
 echo Фильтр:

@@ -293,6 +293,7 @@ if "%ENABLE_TIME%"=="1" (
     set "OVERLAY_FILTER=%OVERLAY_FILTER%:enable='between(t,%START_TIME%,%END_TIME%)'"
 )
 
+set "OVERLAY_FILTER=%OVERLAY_FILTER%[v]"
 set "FILTER_COMPLEX=%WM_FILTER%;%OVERLAY_FILTER%"
 
 goto RUN
@@ -352,7 +353,7 @@ pause >nul
 -i "%INPUT_FILE%" ^
 -stream_loop -1 -i "%WATERMARK_FILE%" ^
 -filter_complex "%FILTER_COMPLEX%" ^
--map 0:v ^
+-map "[v]" ^
 -map 0:a? ^
 -c:v %EDIT_VIDEO_CODEC% %EDIT_VIDEO_OPTIONS% ^
 -c:a %EDIT_AUDIO_CODEC% %EDIT_AUDIO_OPTIONS% ^

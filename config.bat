@@ -82,6 +82,31 @@ if exist "%FFPLAY%" (set "HAS_FFPLAY=1") else (set "HAS_FFPLAY=0")
 
 
 :: ----------------------------------------------------------------------------
+:: Проверка VidStab (необязательные фильтры)
+:: ----------------------------------------------------------------------------
+set "HAS_VIDSTABDETECT=0"
+set "HAS_VIDSTABTRANSFORM=0"
+set "HAS_VIDSTAB=0"
+
+"%FFMPEG%" -hide_banner -filters 2>nul | findstr /i "vidstabdetect" >nul && set "HAS_VIDSTABDETECT=1"
+"%FFMPEG%" -hide_banner -filters 2>nul | findstr /i "vidstabtransform" >nul && set "HAS_VIDSTABTRANSFORM=1"
+
+if "%HAS_VIDSTABDETECT%"=="1" if "%HAS_VIDSTABTRANSFORM%"=="1" set "HAS_VIDSTAB=1"
+
+
+:: ----------------------------------------------------------------------------
+:: Проверка редких image encoders (зависят от конкретной сборки FFmpeg)
+:: ----------------------------------------------------------------------------
+set "HAS_DDS_ENCODER=0"
+set "HAS_PSD_ENCODER=0"
+set "HAS_CINEON_ENCODER=0"
+
+"%FFMPEG%" -hide_banner -encoders 2>nul | findstr /i /c:" dds " >nul && set "HAS_DDS_ENCODER=1"
+"%FFMPEG%" -hide_banner -encoders 2>nul | findstr /i /c:" psd " >nul && set "HAS_PSD_ENCODER=1"
+"%FFMPEG%" -hide_banner -encoders 2>nul | findstr /i /c:" cineon " >nul && set "HAS_CINEON_ENCODER=1"
+
+
+:: ----------------------------------------------------------------------------
 :: Определение версии FFmpeg
 :: ----------------------------------------------------------------------------
 set "FFMPEG_VERSION=unknown"
@@ -129,6 +154,12 @@ endlocal & (
     set "FFPLAY_GLOBAL_OPTIONS=%FFPLAY_GLOBAL_OPTIONS%"
 
     set "HAS_FFPLAY=%HAS_FFPLAY%"
+    set "HAS_VIDSTAB=%HAS_VIDSTAB%"
+    set "HAS_VIDSTABDETECT=%HAS_VIDSTABDETECT%"
+    set "HAS_VIDSTABTRANSFORM=%HAS_VIDSTABTRANSFORM%"
+    set "HAS_DDS_ENCODER=%HAS_DDS_ENCODER%"
+    set "HAS_PSD_ENCODER=%HAS_PSD_ENCODER%"
+    set "HAS_CINEON_ENCODER=%HAS_CINEON_ENCODER%"
     set "FFMPEG_VERSION=%FFMPEG_VERSION%"
     set "CONFIG_LOADED=%CONFIG_LOADED%"
 )

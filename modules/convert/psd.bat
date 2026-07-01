@@ -36,6 +36,15 @@ if not defined CONFIG_LOADED (
     exit /b 1
 )
 
+if not "%HAS_PSD_ENCODER%"=="1" (
+    echo.
+    echo [ERROR] PSD недоступен в текущей сборке FFmpeg.
+    echo [ERROR] Не найден encoder: psd
+    echo.
+    pause
+    exit /b 1
+)
+
 rem ------------------------------------------------------------
 rem Проверка входного файла
 rem ------------------------------------------------------------
@@ -212,6 +221,7 @@ pause >nul
 -frames:v 1 ^
 -c:v psd ^
 -pix_fmt %PIX_FMT% ^
+-f image2 ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

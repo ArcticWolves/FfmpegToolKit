@@ -40,6 +40,15 @@ if not defined CONFIG_LOADED (
     exit /b 1
 )
 
+if not "%HAS_DDS_ENCODER%"=="1" (
+    echo.
+    echo [ERROR] DDS недоступен в текущей сборке FFmpeg.
+    echo [ERROR] Не найден encoder: dds
+    echo.
+    pause
+    exit /b 1
+)
+
 rem ------------------------------------------------------------
 rem Проверка входного файла
 rem ------------------------------------------------------------
@@ -195,6 +204,7 @@ pause >nul
 -frames:v 1 ^
 -pix_fmt %PIX_FMT% ^
 -c:v dds ^
+-f image2 ^
 "%OUTPUT_FILE%"
 
 if errorlevel 1 (

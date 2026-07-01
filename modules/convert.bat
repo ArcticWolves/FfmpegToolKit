@@ -57,7 +57,11 @@ echo 19. ICO
 echo.
 echo ---------------- Advanced Images ------
 echo 20. DPX
-echo 21. DDS
+if "%HAS_DDS_ENCODER%"=="1" (
+    echo 21. DDS
+) else (
+    echo 21. DDS [encoder недоступен]
+)
 echo 22. HDR
 echo 23. JP2
 echo 24. JXL
@@ -65,8 +69,16 @@ echo 25. PAM
 echo 26. PBM
 echo 27. PGM
 echo 28. PPM
-echo 29. PSD
-echo 30. CIN
+if "%HAS_PSD_ENCODER%"=="1" (
+    echo 29. PSD
+) else (
+    echo 29. PSD [encoder недоступен]
+)
+if "%HAS_CINEON_ENCODER%"=="1" (
+    echo 30. CIN
+) else (
+    echo 30. CIN [encoder недоступен]
+)
 echo 31. EXR
 echo 32. PNM
 echo.
@@ -79,6 +91,10 @@ set "CHOICE="
 set /p "CHOICE=Выберите формат: "
 
 if "%CHOICE%"=="0" goto EXIT_MODULE
+
+if "%CHOICE%"=="21" if not "%HAS_DDS_ENCODER%"=="1" goto DDS_UNAVAILABLE
+if "%CHOICE%"=="29" if not "%HAS_PSD_ENCODER%"=="1" goto PSD_UNAVAILABLE
+if "%CHOICE%"=="30" if not "%HAS_CINEON_ENCODER%"=="1" goto CINEON_UNAVAILABLE
 
 set "MODULE_REL="
 if "%CHOICE%"=="1"  set "MODULE_REL=convert\mp4_h264.bat"
@@ -127,6 +143,21 @@ pause
 goto MAIN_MENU
 
 
+:DDS_UNAVAILABLE
+call :EncoderUnavailable "DDS" "dds"
+goto MAIN_MENU
+
+
+:PSD_UNAVAILABLE
+call :EncoderUnavailable "PSD" "psd"
+goto MAIN_MENU
+
+
+:CINEON_UNAVAILABLE
+call :EncoderUnavailable "CIN/Cineon" "cineon"
+goto MAIN_MENU
+
+
 :OpenModule
 call "%SELECTORS_DIR%\select_input_file.bat" || exit /b 1
 
@@ -142,6 +173,16 @@ if not exist "%MODULE_PATH%" (
 )
 
 call "%MODULE_PATH%"
+exit /b 0
+
+
+:EncoderUnavailable
+echo.
+echo [ERROR] %~1 недоступен в текущей сборке FFmpeg.
+echo [ERROR] Не найден encoder: %~2
+echo [ERROR] Замените FFmpeg на сборку с этим encoder или выберите другой формат.
+echo.
+pause
 exit /b 0
 
 

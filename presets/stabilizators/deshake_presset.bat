@@ -22,7 +22,7 @@ endlocal
 exit /b 1
 
 :FAST
-set "FILTER=deshake=rx=8:ry=8:search=less:edge=mirror:blocksize=8"
+set "FILTER=deshake=rx=16:ry=16:search=less:edge=mirror:blocksize=8"
 goto SUCCESS
 
 :STANDARD

@@ -23,8 +23,9 @@ if not defined CONFIG_LOADED (
     exit /b 1
 )
 
-set "HAS_VIDSTAB=0"
-"%FFMPEG%" -hide_banner -filters | findstr /i "vidstabdetect" >nul && set "HAS_VIDSTAB=1"
+if not defined HAS_VIDSTAB set "HAS_VIDSTAB=0"
+if not defined HAS_VIDSTABDETECT set "HAS_VIDSTABDETECT=0"
+if not defined HAS_VIDSTABTRANSFORM set "HAS_VIDSTABTRANSFORM=0"
 
 :MAIN_MENU
 cls
@@ -39,7 +40,9 @@ if "%HAS_VIDSTAB%"=="1" echo  3. VidStab Detect    [Служебный режи�
 if "%HAS_VIDSTAB%"=="1" echo  4. VidStab Transform [Служебный режим]
 if not "%HAS_VIDSTAB%"=="1" (
     echo.
-    echo VidStab недоступен в текущей сборке FFmpeg.
+    echo VidStab не найден в текущей сборке FFmpeg.
+    echo vidstabdetect   : %HAS_VIDSTABDETECT%
+    echo vidstabtransform: %HAS_VIDSTABTRANSFORM%
     echo Доступен только Deshake.
 )
 echo.
@@ -69,7 +72,8 @@ goto MAIN_MENU
 
 :VIDSTAB_UNAVAILABLE
 echo.
-echo [ERROR] VidStab недоступен в текущей сборке FFmpeg.
+echo [ERROR] VidStab не найден в текущей сборке FFmpeg.
+echo [ERROR] vidstabdetect=%HAS_VIDSTABDETECT%, vidstabtransform=%HAS_VIDSTABTRANSFORM%
 echo [ERROR] Используйте Deshake или замените FFmpeg на сборку с libvidstab.
 echo.
 pause

@@ -66,7 +66,7 @@ rem ------------------------------------------------------------
 rem Параметры по умолчанию
 rem ------------------------------------------------------------
 set "TIMECODE=00:00:00"
-set "COMPRESSION=zip"
+set "COMPRESSION=zip16"
 set "PIX_FMT=gbrpf32le"
 
 :MAIN_MENU
@@ -142,9 +142,8 @@ echo ============================================================
 echo.
 echo  1. none
 echo  2. rle
-echo  3. zip   (рекомендуется)
-echo  4. piz
-echo  5. pxr24
+echo  3. zip1
+echo  4. zip16 (рекомендуется)
 echo.
 echo  0. Назад
 echo.
@@ -158,12 +157,10 @@ if "%COMP_CHOICE%"=="1" set "COMPRESSION=none"
 if "%COMP_CHOICE%"=="1" goto MAIN_MENU
 if "%COMP_CHOICE%"=="2" set "COMPRESSION=rle"
 if "%COMP_CHOICE%"=="2" goto MAIN_MENU
-if "%COMP_CHOICE%"=="3" set "COMPRESSION=zip"
+if "%COMP_CHOICE%"=="3" set "COMPRESSION=zip1"
 if "%COMP_CHOICE%"=="3" goto MAIN_MENU
-if "%COMP_CHOICE%"=="4" set "COMPRESSION=piz"
+if "%COMP_CHOICE%"=="4" set "COMPRESSION=zip16"
 if "%COMP_CHOICE%"=="4" goto MAIN_MENU
-if "%COMP_CHOICE%"=="5" set "COMPRESSION=pxr24"
-if "%COMP_CHOICE%"=="5" goto MAIN_MENU
 if "%COMP_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_COMPRESSION
@@ -178,8 +175,6 @@ echo ============================================================
 echo.
 echo  1. gbrpf32le      (32-bit float RGB)
 echo  2. gbrapf32le     (32-bit float RGBA)
-echo  3. gbrpf16le      (16-bit half float RGB)
-echo  4. gbrapf16le     (16-bit half float RGBA)
 echo.
 echo  0. Назад
 echo.
@@ -193,10 +188,6 @@ if "%FMT_CHOICE%"=="1" set "PIX_FMT=gbrpf32le"
 if "%FMT_CHOICE%"=="1" goto MAIN_MENU
 if "%FMT_CHOICE%"=="2" set "PIX_FMT=gbrapf32le"
 if "%FMT_CHOICE%"=="2" goto MAIN_MENU
-if "%FMT_CHOICE%"=="3" set "PIX_FMT=gbrpf16le"
-if "%FMT_CHOICE%"=="3" goto MAIN_MENU
-if "%FMT_CHOICE%"=="4" set "PIX_FMT=gbrapf16le"
-if "%FMT_CHOICE%"=="4" goto MAIN_MENU
 if "%FMT_CHOICE%"=="0" goto MAIN_MENU
 
 goto SET_PIXEL_FORMAT
@@ -238,6 +229,7 @@ pause >nul
 -frames:v 1 ^
 -c:v exr ^
 -compression %COMPRESSION% ^
+-format float ^
 -pix_fmt %PIX_FMT% ^
 "%OUTPUT_FILE%"
 
