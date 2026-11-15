@@ -1,218 +1,25 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
-
 rem ============================================================
 rem modules\convert\jp2.bat
-rem
-rem Извлечение кадра из видео или конвертация изображения в
-rem JPEG 2000 (.jp2).
-rem
-rem Пользователь задаёт:
-rem   - Таймкод
-rem   - Quality (q:v)
-rem
-rem Используемый кодек:
-rem   jpeg2000
-rem
-rem Особенности JPEG 2000:
-rem   - Поддерживает lossless и lossy режимы.
-rem   - Часто используется в архивировании и киноиндустрии.
-rem   - Поддерживает высокую глубину цвета.
-rem
-rem Официальная документация:
-rem   https://ffmpeg.org/ffmpeg-codecs.html#jpeg2000
+rem Профиль изображения: JPEG 2000
+rem JPEG 2000 (встроенный энкодер).
+rem Хуки для convert\_image.bat: args, settings.
 rem ============================================================
+if /i "%~1"=="args" goto ARGS
+if /i "%~1"=="settings" goto SETTINGS
 
-rem ------------------------------------------------------------
-rem Проверка конфигурации
-rem ------------------------------------------------------------
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FFmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
-
-rem ------------------------------------------------------------
-rem Проверка входного файла
-rem ------------------------------------------------------------
-if not defined INPUT_FILE (
-    echo.
-    echo [ERROR] INPUT_FILE не задан.
-    echo.
-    pause
-    exit /b 1
-)
-
-if not exist "%INPUT_FILE%" (
-    echo.
-    echo [ERROR] Входной файл не найден:
-    echo         %INPUT_FILE%
-    echo.
-    pause
-    exit /b 1
-)
-
-rem ------------------------------------------------------------
-rem Получение имени входного файла
-rem ------------------------------------------------------------
-for %%F in ("%INPUT_FILE%") do (
-    set "INPUT_NAME=%%~nF"
-)
-
-rem ------------------------------------------------------------
-rem Параметры по умолчанию
-rem ------------------------------------------------------------
-set "TIMECODE=00:00:00"
-set "QVALUE=3"
-
-:MAIN_MENU
-cls
-
-echo ============================================================
-echo                      JPEG 2000
-echo ============================================================
-echo.
-echo Входной файл:
-echo   %INPUT_FILE%
-echo.
-echo Таймкод:
-echo   %TIMECODE%
-echo.
-echo Quality (-q:v):
-echo   %QVALUE%
-echo.
-echo ============================================================
-echo.
-echo  1. Указать таймкод
-echo  2. Указать качество
-echo  3. Создать JP2
-echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
-
-set "CHOICE="
-set /p "CHOICE=Выберите действие: "
-
-if "%CHOICE%"=="1" goto SET_TIMECODE
-if "%CHOICE%"=="2" goto SET_QUALITY
-if "%CHOICE%"=="3" goto RUN
-if "%CHOICE%"=="0" goto EXIT_MODULE
-
-echo.
-echo [ERROR] Некорректный выбор.
-pause
-goto MAIN_MENU
-
-
-:SET_TIMECODE
-cls
-echo.
-echo Примеры:
-echo   00:00:00
-echo   00:01:23
-echo   00:01:23.500
-echo.
-set "NEW_TIMECODE="
-set /p "NEW_TIMECODE=Введите таймкод [%TIMECODE%]: "
-
-if defined NEW_TIMECODE (
-    set "TIMECODE=%NEW_TIMECODE%"
-)
-
-goto MAIN_MENU
-
-
-:SET_QUALITY
-cls
-echo.
-echo Рекомендуемые значения:
-echo   1 = максимальное качество
-echo   3 = высокое качество
-echo   5 = хороший баланс
-echo   10 = меньший размер файла
-echo.
-set "NEW_QVALUE="
-set /p "NEW_QVALUE=Введите значение [%QVALUE%]: "
-
-if defined NEW_QVALUE (
-    set "QVALUE=%NEW_QVALUE%"
-)
-
-goto MAIN_MENU
-
-
-:RUN
-set "SAFE_TIMECODE=%TIMECODE::=-%"
-set "SAFE_TIMECODE=%SAFE_TIMECODE:.=-%"
+set "FORMAT_TITLE=JPEG 2000"
 set "OUTPUT_EXT=jp2"
-set "OUTPUT_SUFFIX=%SAFE_TIMECODE%"
-call "%SELECTORS_DIR%\select_output_file.bat"
-if errorlevel 1 goto MAIN_MENU
+set "HAS_SETTINGS=1"
+set "P_Q=3"
+call "%MODULES_DIR%\convert\_image.bat" "%~f0"
+exit /b %errorlevel%
 
-cls
-echo ============================================================
-echo                    Создание JP2
-echo ============================================================
-echo.
-echo Таймкод:
-echo   %TIMECODE%
-echo.
-echo Quality:
-echo   %QVALUE%
-echo.
-echo Выходной файл:
-echo   %OUTPUT_FILE%
-echo.
-echo ============================================================
-echo.
-echo Нажмите любую клавишу для запуска...
-pause >nul
+:ARGS
+set "IMAGE_ARGS=-c:v jpeg2000 -q:v %P_Q%"
+set "IMAGE_DESC=качество q=%P_Q% (1 = лучшее)"
+exit /b 0
 
-"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
--ss %TIMECODE% ^
--i "%INPUT_FILE%" ^
--frames:v 1 ^
--c:v jpeg2000 ^
--q:v %QVALUE% ^
-"%OUTPUT_FILE%"
-
-if errorlevel 1 (
-    echo.
-    echo [ERROR] Не удалось создать JP2.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-echo.
-echo ============================================================
-echo                        Готово
-echo ============================================================
-echo.
-echo JP2 файл:
-echo   %OUTPUT_FILE%
-echo.
-
-if "%HAS_FFPLAY%"=="1" (
-    echo.
-    set "OPEN_RESULT="
-    set /p "OPEN_RESULT=Открыть изображение в FFplay? (Y/N): "
-
-    if /i "%OPEN_RESULT%"=="Y" (
-        "%FFPLAY%" %FFPLAY_GLOBAL_OPTIONS% "%OUTPUT_FILE%"
-    )
-)
-
-pause
-goto MAIN_MENU
-
-
-:EXIT_MODULE
-endlocal
+:SETTINGS
+call "%LIB%" :AskInt P_Q "Качество 1-31, меньше = лучше" %P_Q% 1 31
 exit /b 0

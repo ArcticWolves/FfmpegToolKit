@@ -1,121 +1,89 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
+rem ============================================================
+rem modules\edit\stabilization.bat
+rem Стабилизация видео:
+rem   deshake  - один проход, есть в любой сборке FFmpeg;
+rem   vidstab  - два прохода (анализ + трансформация), заметно лучше,
+rem              есть только в GPL-сборках FFmpeg.
+rem Входной файл (INPUT_FILE) уже выбран в edit.bat.
+rem ============================================================
 
-:: ============================================================
-:: modules\edit\stabilization.bat
-::
-:: Раздел "Стабилизация видео".
-::
-:: Поддерживаемые методы:
-::   1. deshake
-::   2. vidstab (автоматический двухпроходный режим)
-::   3. vidstabdetect   (служебный)
-::   4. vidstabtransform (служебный)
-:: ============================================================
-
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FFmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
-
-if not defined HAS_VIDSTAB set "HAS_VIDSTAB=0"
-if not defined HAS_VIDSTABDETECT set "HAS_VIDSTABDETECT=0"
-if not defined HAS_VIDSTABTRANSFORM set "HAS_VIDSTABTRANSFORM=0"
-
-:MAIN_MENU
-cls
-
-echo ============================================================
-echo                    Стабилизация видео
-echo ============================================================
+:MENU
+call "%LIB%" :Header "Стабилизация"
+echo  Deshake (один проход):
+echo   1. Быстрая
+echo   2. Стандартная
+echo   3. Сильная
+echo   4. Свои параметры
 echo.
-echo  1. Deshake
-if "%HAS_VIDSTAB%"=="1" echo  2. VidStab ^(Автоматическая стабилизация^)
-if "%HAS_VIDSTAB%"=="1" echo  3. VidStab Detect    [Служебный режим]
-if "%HAS_VIDSTAB%"=="1" echo  4. VidStab Transform [Служебный режим]
-if not "%HAS_VIDSTAB%"=="1" (
-    echo.
-    echo VidStab не найден в текущей сборке FFmpeg.
-    echo vidstabdetect   : %HAS_VIDSTABDETECT%
-    echo vidstabtransform: %HAS_VIDSTABTRANSFORM%
-    echo Доступен только Deshake.
+if "%HAS_VIDSTAB%"=="1" (
+    echo  VidStab ^(два прохода, лучшее качество^):
+    echo   5. Лёгкая
+    echo   6. Стандартная
+    echo   7. Максимально плавная
+) else (
+    echo  VidStab: недоступен - нужна GPL-сборка FFmpeg ^(см. Readme.txt^)
 )
 echo.
-echo  0. Назад
+echo   0. Назад
 echo.
-echo ============================================================
-echo.
+call "%LIB%" :AskChoice "Выберите режим"
 
-set "CHOICE="
-set /p "CHOICE=Выберите метод стабилизации: "
+set "VIDEO_FILTER="
+if "%CHOICE%"=="1" set "VIDEO_FILTER=deshake=rx=16:ry=16:search=less:edge=mirror:blocksize=8"
+if "%CHOICE%"=="2" set "VIDEO_FILTER=deshake=rx=32:ry=32:edge=mirror:blocksize=8"
+if "%CHOICE%"=="3" set "VIDEO_FILTER=deshake=rx=64:ry=64:search=exhaustive:edge=mirror:blocksize=8"
+if "%CHOICE%"=="4" goto CUSTOM
+if "%CHOICE%"=="0" exit /b 0
+if defined VIDEO_FILTER goto RUN_DESHAKE
 
-if "%CHOICE%"=="1" goto MENU_DESHAKE
-if "%CHOICE%"=="2" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
-if "%CHOICE%"=="3" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
-if "%CHOICE%"=="4" if "%HAS_VIDSTAB%"=="0" goto VIDSTAB_UNAVAILABLE
-if "%CHOICE%"=="2" goto MENU_VIDSTAB
-if "%CHOICE%"=="3" goto MENU_VIDSTABDETECT
-if "%CHOICE%"=="4" goto MENU_VIDSTABTRANSFORM
-if "%CHOICE%"=="0" goto EXIT_MODULE
-
-echo.
-echo [ERROR] Некорректный выбор.
-echo.
-pause
-goto MAIN_MENU
+if not "%HAS_VIDSTAB%"=="1" (call "%LIB%" :InvalidChoice & goto MENU)
+set "SHAKY=" & set "SMOOTH="
+if "%CHOICE%"=="5" (set "SHAKY=4" & set "SMOOTH=10" & set "OPTZOOM=1")
+if "%CHOICE%"=="6" (set "SHAKY=6" & set "SMOOTH=20" & set "OPTZOOM=1")
+if "%CHOICE%"=="7" (set "SHAKY=8" & set "SMOOTH=40" & set "OPTZOOM=2")
+if not defined SHAKY (call "%LIB%" :InvalidChoice & goto MENU)
+goto RUN_VIDSTAB
 
 
-:VIDSTAB_UNAVAILABLE
-echo.
-echo [ERROR] VidStab не найден в текущей сборке FFmpeg.
-echo [ERROR] vidstabdetect=%HAS_VIDSTABDETECT%, vidstabtransform=%HAS_VIDSTABTRANSFORM%
-echo [ERROR] Используйте Deshake или замените FFmpeg на сборку с libvidstab.
-echo.
-pause
-goto MAIN_MENU
+:CUSTOM
+call "%LIB%" :AskInt RX "Макс. смещение по X, пикселей (0-64)" 32 0 64
+call "%LIB%" :AskInt RY "Макс. смещение по Y, пикселей (0-64)" 32 0 64
+call "%LIB%" :AskPick EDGE "Края: blank, original, clamp, mirror" mirror "blank original clamp mirror"
+call "%LIB%" :AskPick SEARCH "Поиск: exhaustive, less" exhaustive "exhaustive less"
+set "VIDEO_FILTER=deshake=rx=%RX%:ry=%RY%:edge=%EDGE%:search=%SEARCH%:blocksize=8"
 
-
-:MENU_DESHAKE
-call :RunModule "edit\stabilizators\deshake.bat"
-goto MAIN_MENU
-
-
-:MENU_VIDSTAB
-call :RunModule "edit\stabilizators\vidstab.bat"
-goto MAIN_MENU
-
-
-:MENU_VIDSTABDETECT
-call :RunModule "edit\stabilizators\vidstabdetect.bat"
-goto MAIN_MENU
-
-
-:MENU_VIDSTABTRANSFORM
-call :RunModule "edit\stabilizators\vidstabtransform.bat"
-goto MAIN_MENU
-
-
-:RunModule
-set "MODULE_PATH=%MODULES_DIR%\%~1"
-
-if not exist "%MODULE_PATH%" (
-    echo.
-    echo [ERROR] Не найден модуль:
-    echo         %MODULE_PATH%
-    echo.
-    pause
-    exit /b 1
-)
-
-call "%MODULE_PATH%"
+:RUN_DESHAKE
+set "OUTPUT_SUFFIX=deshake"
+set "JOB_TITLE=Стабилизация (deshake)"
+call "%TRANSCODE%"
 exit /b 0
 
 
-:EXIT_MODULE
-endlocal
+rem ------------------------------------------------------------
+rem VidStab: проход 1 - анализ движения в .trf, проход 2 - через
+rem общий движок (выбор файла, кодеков, запуск).
+rem ------------------------------------------------------------
+:RUN_VIDSTAB
+rem Фиксированное имя: путь попадает в фильтр, апострофы в имени входного
+rem файла его бы сломали.
+set "TRF=%TRANSFORMS_DIR%\vidstab.trf"
+set "TRF_F=%TRF%"
+call "%LIB%" :FilterPath TRF_F
+
+call "%LIB%" :Header "VidStab: проход 1 из 2 (анализ)"
+set "FF_ARGS=-i "!INPUT_FILE!" -vf "vidstabdetect=result='!TRF_F!':shakiness=%SHAKY%:accuracy=15" -an -f null -"
+call "%LIB%" :RunFF
+if errorlevel 1 (
+    echo [ERROR] Анализ движения не удался.
+    pause
+    exit /b 1
+)
+
+set "VIDEO_FILTER=vidstabtransform=input='!TRF_F!':smoothing=%SMOOTH%:optzoom=%OPTZOOM%:interpol=bicubic,unsharp=5:5:0.8:3:3:0.4"
+set "OUTPUT_SUFFIX=vidstab"
+set "JOB_TITLE=VidStab: проход 2 из 2"
+call "%TRANSCODE%"
+
+if exist "%TRF%" del /q "%TRF%"
 exit /b 0

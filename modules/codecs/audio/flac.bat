@@ -1,17 +1,12 @@
+@rem @label FLAC (без потерь)
 @echo off
-setlocal EnableExtensions
-
-set "COMPRESSION=8"
-
-echo.
-set /p "COMPRESSION=Compression level 0-12 [8]: "
-if not defined COMPRESSION set "COMPRESSION=8"
-
+rem ------------------------------------------------------------
+rem modules\codecs\audio\flac.bat
+rem Встроенный энкодер flac.
+rem %1 = auto  ->  без вопросов, значения по умолчанию.
+rem Результат: AUDIO_CODEC, AUDIO_CODEC_OPTIONS
+rem ------------------------------------------------------------
+set "_q=8"
+if /i not "%~1"=="auto" call "%LIB%" :AskInt _q "Степень сжатия 0-12" 8 0 12
 set "AUDIO_CODEC=flac"
-set "AUDIO_CODEC_OPTIONS=-compression_level %COMPRESSION%"
-
-endlocal & (
-    set "AUDIO_CODEC=%AUDIO_CODEC%"
-    set "AUDIO_CODEC_OPTIONS=%AUDIO_CODEC_OPTIONS%"
-)
-exit /b 0
+set "AUDIO_CODEC_OPTIONS=-compression_level %_q%"

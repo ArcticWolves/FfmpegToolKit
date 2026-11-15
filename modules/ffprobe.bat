@@ -1,510 +1,139 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
 
-rem ============================================================================
+rem ============================================================
 rem modules\ffprobe.bat
-rem
-rem Интерактивный модуль анализа мультимедийных файлов на базе FFprobe.
-rem
-rem Основная идея:
-rem   1. Пользователь выбирает тип анализа.
-rem   2. Система показывает результат в человекочитаемом виде.
-rem   3. После просмотра предлагает сохранить результат.
-rem   4. Поддерживаются TXT, JSON и CSV.
-rem
-rem Официальная документация:
-rem   https://ffmpeg.org/ffprobe.html
-rem ============================================================================
+rem Анализ медиафайлов через FFprobe.
+rem Отчёты сохраняются в temp\logs.
+rem ============================================================
 
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FFmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
+if not defined CONFIG_LOADED (echo [ERROR] Запустите FFmpegToolkit.bat & pause & exit /b 1)
+
+:SELECT
+set "INPUT_TITLE=FFprobe: выбор файла"
+call "%SELECTORS_DIR%\select_input_file.bat"
+if errorlevel 1 goto EXIT_MODULE
 
 :MAIN_MENU
-cls
-echo ============================================================
-echo                         FFprobe
-echo ============================================================
+call "%LIB%" :Header "FFprobe"
+echo Файл: !INPUT_FILE!
 echo.
-echo  1. Сводный отчет
-echo  2. Полный JSON
-echo  3. Формат контейнера
-echo  4. Длительность
-echo  5. Размер файла
-echo  6. Битрейт
-echo  7. Видео кодек
-echo  8. Аудио кодек
-echo  9. Кодек субтитров
-echo 10. Разрешение
-echo 11. FPS
-echo 12. Pixel Format
-echo 13. Количество кадров
-echo 14. Количество аудиоканалов
-echo 15. Частота дискретизации
-echo 16. Язык аудио
-echo 17. Проверить наличие видео
-echo 18. Проверить наличие аудио
-echo 19. Проверить наличие субтитров
-echo 20. Сравнить два файла
+echo   1. Сводка: контейнер и все потоки
+echo   2. Полный отчёт JSON (сохраняется в temp\logs)
+echo   3. Точное количество кадров (медленно)
+echo   4. Ключевые кадры (время)
+echo   5. Главы
+echo   6. Громкость (EBU R128: LUFS, пики)
+echo   7. Сравнить с другим файлом
+echo   8. Выбрать другой файл
+echo   0. Назад
 echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
-
-set "CHOICE="
-set /p "CHOICE=Выберите действие: "
-
+call "%LIB%" :AskChoice "Выберите действие"
+if "%CHOICE%"=="1" (call :Summary "!INPUT_FILE!" & pause & goto MAIN_MENU)
+if "%CHOICE%"=="2" goto FULL_JSON
+if "%CHOICE%"=="3" goto FRAME_COUNT
+if "%CHOICE%"=="4" goto KEYFRAMES
+if "%CHOICE%"=="5" goto CHAPTERS
+if "%CHOICE%"=="6" goto LOUDNESS
+if "%CHOICE%"=="7" goto COMPARE
+if "%CHOICE%"=="8" goto SELECT
 if "%CHOICE%"=="0" goto EXIT_MODULE
-if "%CHOICE%"=="20" goto COMPARE_INTERACTIVE
+call "%LIB%" :InvalidChoice
+goto MAIN_MENU
 
-set "INPUT="
-set /p "INPUT=Введите путь к файлу: "
 
-if not exist "%INPUT%" (
-    echo.
-    echo [ERROR] Файл не найден.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-if "%CHOICE%"=="1" goto SHOW_REPORT
-if "%CHOICE%"=="2" goto SHOW_FULL_JSON
-if "%CHOICE%"=="3" call :DisplayResult "Container Format" "format_name"        "format"
-if "%CHOICE%"=="3" goto MAIN_MENU
-if "%CHOICE%"=="4" call :DisplayResult "Duration (seconds)" "duration"         "format"
-if "%CHOICE%"=="4" goto MAIN_MENU
-if "%CHOICE%"=="5" call :DisplayResult "File Size (bytes)" "size"              "format"
-if "%CHOICE%"=="5" goto MAIN_MENU
-if "%CHOICE%"=="6" call :DisplayResult "Bitrate"          "bit_rate"           "format"
-if "%CHOICE%"=="6" goto MAIN_MENU
-if "%CHOICE%"=="7" call :DisplayResult "Video Codec"      "codec_name"         "stream_v"
-if "%CHOICE%"=="7" goto MAIN_MENU
-if "%CHOICE%"=="8" call :DisplayResult "Audio Codec"      "codec_name"         "stream_a"
-if "%CHOICE%"=="8" goto MAIN_MENU
-if "%CHOICE%"=="9" call :DisplayResult "Subtitle Codec"   "codec_name"         "stream_s"
-if "%CHOICE%"=="9" goto MAIN_MENU
-if "%CHOICE%"=="10" call :DisplayResolution
-if "%CHOICE%"=="10" goto MAIN_MENU
-if "%CHOICE%"=="11" call :DisplayResult "FPS"             "avg_frame_rate"     "stream_v"
-if "%CHOICE%"=="11" goto MAIN_MENU
-if "%CHOICE%"=="12" call :DisplayResult "Pixel Format"    "pix_fmt"            "stream_v"
-if "%CHOICE%"=="12" goto MAIN_MENU
-if "%CHOICE%"=="13" call :DisplayFrameCount
-if "%CHOICE%"=="13" goto MAIN_MENU
-if "%CHOICE%"=="14" call :DisplayResult "Audio Channels"  "channels"           "stream_a"
-if "%CHOICE%"=="14" goto MAIN_MENU
-if "%CHOICE%"=="15" call :DisplayResult "Sample Rate"     "sample_rate"        "stream_a"
-if "%CHOICE%"=="15" goto MAIN_MENU
-if "%CHOICE%"=="16" call :DisplayResult "Audio Language"  "language"           "stream_tag_a"
-if "%CHOICE%"=="16" goto MAIN_MENU
-if "%CHOICE%"=="17" call :DisplayPresence "Has Video"     "v"
-if "%CHOICE%"=="17" goto MAIN_MENU
-if "%CHOICE%"=="18" call :DisplayPresence "Has Audio"     "a"
-if "%CHOICE%"=="18" goto MAIN_MENU
-if "%CHOICE%"=="19" call :DisplayPresence "Has Subtitles" "s"
-if "%CHOICE%"=="19" goto MAIN_MENU
-
+rem ------------------------------------------------------------
+rem :Summary "файл" - читаемая сводка
+rem ------------------------------------------------------------
+:Summary
 echo.
-echo [ERROR] Некорректный выбор.
+echo ---------------- Контейнер ----------------
+"%FFPROBE%" -v error -show_entries format=format_long_name,duration,size,bit_rate:format_tags=title,encoder,creation_time -of default=noprint_wrappers=1 "%~1"
+echo.
+echo ---------------- Потоки -------------------
+"%FFPROBE%" -v error -show_entries stream=index,codec_type,codec_name,profile,width,height,pix_fmt,r_frame_rate,sample_rate,channels,channel_layout,bit_rate:stream_tags=language,title -of compact=p=0:nk=0 "%~1"
+echo.
+exit /b 0
+
+
+:FULL_JSON
+for %%F in ("%INPUT_FILE%") do set "REPORT=%LOG_DIR%\%%~nF_ffprobe.json"
+"%FFPROBE%" -v error -print_format json -show_format -show_streams -show_chapters "%INPUT_FILE%" > "%REPORT%"
+if errorlevel 1 (echo [ERROR] FFprobe завершился с ошибкой. & pause & goto MAIN_MENU)
+echo.
+echo Сохранено: %REPORT%
+call "%LIB%" :AskYN "Открыть в Блокноте?" N
+if not errorlevel 1 start "" notepad "%REPORT%"
+goto MAIN_MENU
+
+
+:FRAME_COUNT
+echo.
+echo Подсчёт кадров (файл читается целиком)...
+call "%LIB%" :Probe FRAMES "-count_frames -select_streams v:0 -show_entries stream=nb_read_frames" "%INPUT_FILE%"
+if not defined FRAMES set "FRAMES=нет видео"
+echo Кадров: %FRAMES%
 pause
 goto MAIN_MENU
 
-rem ============================================================================
-rem Сводный отчет
-rem ============================================================================
-:SHOW_REPORT
-cls
-echo ============================================================
-echo                       FFprobe Report
-echo ============================================================
+
+:KEYFRAMES
+for %%F in ("%INPUT_FILE%") do set "REPORT=%LOG_DIR%\%%~nF_keyframes.txt"
 echo.
-echo File:
-echo %INPUT%
-echo.
-
-call :DisplayResultNoSave "Container Format" "format_name" "format"
-call :DisplayResultNoSave "Duration (seconds)" "duration" "format"
-call :DisplayResultNoSave "Video Codec" "codec_name" "stream_v"
-call :DisplayResultNoSave "Audio Codec" "codec_name" "stream_a"
-call :DisplayResolutionNoSave
-call :DisplayResultNoSave "FPS" "avg_frame_rate" "stream_v"
-
-call :PromptSaveFullReport
-goto MAIN_MENU
-
-rem ============================================================================
-rem Полный JSON
-rem ============================================================================
-:SHOW_FULL_JSON
-cls
-echo ============================================================
-echo                         Full JSON
-echo ============================================================
-echo.
-
-"%FFPROBE%" -v quiet -print_format json -show_format -show_streams "%INPUT%"
-
-call :PromptSaveRawJSON
-goto MAIN_MENU
-
-rem ============================================================================
-rem Сравнение двух файлов
-rem ============================================================================
-:COMPARE_INTERACTIVE
-cls
-
-set "INPUT="
-set "INPUT2="
-
-set /p "INPUT=Введите путь к первому файлу: "
-set /p "INPUT2=Введите путь ко второму файлу: "
-
-if not exist "%INPUT%" (
-    echo.
-    echo [ERROR] Первый файл не найден.
-    pause
-    goto MAIN_MENU
-)
-
-if not exist "%INPUT2%" (
-    echo.
-    echo [ERROR] Второй файл не найден.
-    pause
-    goto MAIN_MENU
-)
-
-cls
-echo ============================================================
-echo FILE 1
-echo ============================================================
-echo.
-call :ShowQuickReport "%INPUT%"
-
-echo.
-echo ============================================================
-echo FILE 2
-echo ============================================================
-echo.
-call :ShowQuickReport "%INPUT2%"
-
+echo Поиск ключевых кадров...
+"%FFPROBE%" -v error -select_streams v:0 -skip_frame nokey -show_entries frame=pts_time -of csv=p=0 "%INPUT_FILE%" > "%REPORT%"
+set "KCOUNT=0"
+for /f "usebackq delims=" %%L in ("%REPORT%") do set /a KCOUNT+=1
+echo Ключевых кадров: %KCOUNT%
+echo Список времён сохранён: %REPORT%
 pause
 goto MAIN_MENU
 
-rem ============================================================================
-rem Универсальное отображение результата
-rem ============================================================================
-:DisplayResult
-set "TITLE=%~1"
-set "ENTRY=%~2"
-set "MODE=%~3"
 
-call :GetValue "%ENTRY%" "%MODE%"
-call :ShowValue "%TITLE%" "%RESULT%"
-call :PromptSaveResult "%TITLE%" "%RESULT%"
-exit /b 0
+:CHAPTERS
+echo.
+"%FFPROBE%" -v error -show_entries chapter=start_time,end_time:chapter_tags=title -of compact=p=0 "%INPUT_FILE%"
+echo (если список пуст - глав в файле нет)
+pause
+goto MAIN_MENU
 
-:DisplayResultNoSave
-set "TITLE=%~1"
-set "ENTRY=%~2"
-set "MODE=%~3"
 
-call :GetValue "%ENTRY%" "%MODE%"
-echo %TITLE%: %RESULT%
-exit /b 0
-
-rem ============================================================================
-rem Получение значения
-rem ============================================================================
-:GetValue
-set "ENTRY=%~1"
-set "MODE=%~2"
-set "RESULT="
-
-if /I "%MODE%"=="format" (
-    for /f "delims=" %%I in ('
-        "%FFPROBE%" -v error ^
-        -show_entries format^=%ENTRY% ^
-        -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-    ') do set "RESULT=%%I"
+:LOUDNESS
+echo.
+echo Измерение громкости (EBU R128)...
+"%FFMPEG%" -hide_banner -nostats -i "%INPUT_FILE%" -map 0:a:0 -af ebur128=peak=true -f null - 2> "%TEMP_DIR%\ebur128.txt"
+set "PRINT="
+for /f "usebackq delims=" %%L in ("%TEMP_DIR%\ebur128.txt") do (
+    set "_l=%%L"
+    if "!_l:Summary=!" neq "!_l!" set "PRINT=1"
+    if defined PRINT echo %%L
 )
+if not defined PRINT echo [ERROR] В файле нет аудио или измерение не удалось.
+echo.
+echo Integrated (I) - средняя громкость: YouTube/Spotify ~ -14 LUFS.
+echo Нормализовать: Редактирование - Нормализация громкости.
+pause
+goto MAIN_MENU
 
-if /I "%MODE%"=="stream_v" (
-    for /f "delims=" %%I in ('
-        "%FFPROBE%" -v error ^
-        -select_streams v:0 ^
-        -show_entries stream^=%ENTRY% ^
-        -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-    ') do set "RESULT=%%I"
-)
 
-if /I "%MODE%"=="stream_a" (
-    for /f "delims=" %%I in ('
-        "%FFPROBE%" -v error ^
-        -select_streams a:0 ^
-        -show_entries stream^=%ENTRY% ^
-        -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-    ') do set "RESULT=%%I"
-)
-
-if /I "%MODE%"=="stream_s" (
-    for /f "delims=" %%I in ('
-        "%FFPROBE%" -v error ^
-        -select_streams s:0 ^
-        -show_entries stream^=%ENTRY% ^
-        -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-    ') do set "RESULT=%%I"
-)
-
-if /I "%MODE%"=="stream_tag_a" (
-    for /f "delims=" %%I in ('
-        "%FFPROBE%" -v error ^
-        -select_streams a:0 ^
-        -show_entries stream_tags^=%ENTRY% ^
-        -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-    ') do set "RESULT=%%I"
-)
-
-if not defined RESULT set "RESULT=N/A"
-exit /b 0
-
-rem ============================================================================
-rem Разрешение
-rem ============================================================================
-:DisplayResolution
-for /f "delims=" %%I in ('
-    "%FFPROBE%" -v error ^
-    -select_streams v:0 ^
-    -show_entries stream^=width,height ^
-    -of csv^=s^=x:p^=0 "%INPUT%"
-') do set "RESULT=%%I"
-
-if not defined RESULT set "RESULT=N/A"
-
-call :ShowValue "Resolution" "%RESULT%"
-call :PromptSaveResult "Resolution" "%RESULT%"
-exit /b 0
-
-:DisplayResolutionNoSave
-for /f "delims=" %%I in ('
-    "%FFPROBE%" -v error ^
-    -select_streams v:0 ^
-    -show_entries stream^=width,height ^
-    -of csv^=s^=x:p^=0 "%INPUT%"
-') do set "RESULT=%%I"
-
-if not defined RESULT set "RESULT=N/A"
-echo Resolution: %RESULT%
-exit /b 0
-
-rem ============================================================================
-rem Количество кадров
-rem ============================================================================
-:DisplayFrameCount
-for /f "delims=" %%I in ('
-    "%FFPROBE%" -v error -count_frames ^
-    -select_streams v:0 ^
-    -show_entries stream^=nb_read_frames ^
-    -of default^=nokey^=1:noprint_wrappers^=1 "%INPUT%"
-') do set "RESULT=%%I"
-
-if not defined RESULT set "RESULT=N/A"
-
-call :ShowValue "Frame Count" "%RESULT%"
-call :PromptSaveResult "Frame Count" "%RESULT%"
-exit /b 0
-
-rem ============================================================================
-rem Проверка наличия потока
-rem ============================================================================
-:DisplayPresence
-set "TITLE=%~1"
-set "STREAM=%~2"
-set "RESULT=0"
-
-for /f "delims=" %%I in ('
-    "%FFPROBE%" -v error -select_streams %STREAM% ^
-    -show_entries stream^=index ^
-    -of csv^=p^=0 "%INPUT%"
-') do (
-    set "RESULT=1"
-)
-
-call :ShowValue "%TITLE%" "%RESULT%"
-call :PromptSaveResult "%TITLE%" "%RESULT%"
-exit /b 0
-
-rem ============================================================================
-rem Отображение значения
-rem ============================================================================
-:ShowValue
+:COMPARE
+set "FIRST=%INPUT_FILE%"
+set "INPUT_TITLE=Второй файл для сравнения"
+call "%SELECTORS_DIR%\select_input_file.bat"
+if errorlevel 1 (set "INPUT_FILE=%FIRST%" & goto MAIN_MENU)
+set "SECOND=%INPUT_FILE%"
+set "INPUT_FILE=%FIRST%"
 cls
-echo ============================================================
-echo %~1
-echo ============================================================
-echo.
-echo File:
-echo %INPUT%
-echo.
-echo Value:
-echo %~2
-echo.
-exit /b 0
-
-rem ============================================================================
-rem Сохранение результата
-rem ============================================================================
-:PromptSaveResult
-set "TITLE=%~1"
-set "VALUE=%~2"
-
-echo.
-set "SAVE_RESULT="
-set /p "SAVE_RESULT=Сохранить результат? (Y/N): "
-
-if /I not "%SAVE_RESULT%"=="Y" exit /b 0
-
-echo.
-echo 1. TXT
-echo 2. JSON
-echo 3. CSV
-echo 0. Отмена
-echo.
-
-set "FORMAT_CHOICE="
-set /p "FORMAT_CHOICE=Выберите формат: "
-
-for %%F in ("%INPUT%") do set "BASE_NAME=%%~nF"
-
-if "%FORMAT_CHOICE%"=="1" (
-    set "OUTPUT_FILE=%LOG_DIR%\%BASE_NAME%_%TITLE%.txt"
-    > "%OUTPUT_FILE%" (
-        echo %TITLE%: %VALUE%
-        echo File: %INPUT%
-    )
-)
-
-if "%FORMAT_CHOICE%"=="2" (
-    set "OUTPUT_FILE=%LOG_DIR%\%BASE_NAME%_%TITLE%.json"
-    > "%OUTPUT_FILE%" (
-        echo {
-        echo   "title": "%TITLE%",
-        echo   "value": "%VALUE%",
-        echo   "file": "%INPUT:\=\\%"
-        echo }
-    )
-)
-
-if "%FORMAT_CHOICE%"=="3" (
-    set "OUTPUT_FILE=%LOG_DIR%\%BASE_NAME%_%TITLE%.csv"
-    > "%OUTPUT_FILE%" (
-        echo Title,Value,File
-        echo "%TITLE%","%VALUE%","%INPUT%"
-    )
-)
-
-if "%FORMAT_CHOICE%"=="0" exit /b 0
-
-echo.
-echo Файл сохранён:
-echo %OUTPUT_FILE%
-echo.
+echo ================= ФАЙЛ 1 =================
+echo %FIRST%
+call :Summary "%FIRST%"
+echo ================= ФАЙЛ 2 =================
+echo %SECOND%
+call :Summary "%SECOND%"
 pause
-exit /b 0
+goto MAIN_MENU
 
-rem ============================================================================
-rem Сохранение полного JSON
-rem ============================================================================
-:PromptSaveRawJSON
-echo.
-set "SAVE_JSON="
-set /p "SAVE_JSON=Сохранить JSON в logs? (Y/N): "
 
-if /I not "%SAVE_JSON%"=="Y" (
-    pause
-    exit /b 0
-)
-
-for %%F in ("%INPUT%") do (
-    set "OUTPUT_FILE=%LOG_DIR%\%%~nF_ffprobe.json"
-)
-
-"%FFPROBE%" -v quiet -print_format json -show_format -show_streams "%INPUT%" > "%OUTPUT_FILE%"
-
-echo.
-echo Файл сохранён:
-echo %OUTPUT_FILE%
-echo.
-pause
-exit /b 0
-
-rem ============================================================================
-rem Сохранение сводного отчёта
-rem ============================================================================
-:PromptSaveFullReport
-echo.
-set "SAVE_REPORT="
-set /p "SAVE_REPORT=Сохранить сводный отчет? (Y/N): "
-
-if /I "%SAVE_REPORT%"=="Y" (
-    for %%F in ("%INPUT%") do (
-        set "OUTPUT_FILE=%LOG_DIR%\%%~nF_report.txt"
-    )
-
-    (
-        echo FFprobe Report
-        echo File: %INPUT%
-        echo.
-        call :ShowQuickReport "%INPUT%"
-    ) > "%OUTPUT_FILE%"
-
-    echo.
-    echo Файл сохранён:
-    echo %OUTPUT_FILE%
-)
-
-echo.
-pause
-exit /b 0
-
-rem ============================================================================
-rem Быстрый отчёт
-rem ============================================================================
-:ShowQuickReport
-set "INPUT=%~1"
-
-call :GetValue "format_name" "format"
-echo Container Format: %RESULT%
-
-call :GetValue "duration" "format"
-echo Duration: %RESULT%
-
-call :GetValue "codec_name" "stream_v"
-echo Video Codec: %RESULT%
-
-call :GetValue "codec_name" "stream_a"
-echo Audio Codec: %RESULT%
-
-for /f "delims=" %%I in ('
-    "%FFPROBE%" -v error ^
-    -select_streams v:0 ^
-    -show_entries stream^=width,height ^
-    -of csv^=s^=x:p^=0 "%INPUT%"
-') do set "RESULT=%%I"
-echo Resolution: %RESULT%
-
-exit /b 0
-
-rem ============================================================================
-rem Выход
-rem ============================================================================
 :EXIT_MODULE
 endlocal
 exit /b 0

@@ -1,2 +1,13 @@
-# Auto detect text files and perform LF normalization
+# Автоматическая нормализация концов строк
 * text=auto
+
+# cmd.exe требует CRLF: с LF ломаются goto/call :метка
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Бинарные файлы
+*.exe binary
+*.dll binary
+*.png binary
+*.ico binary
+*.mp4 binary

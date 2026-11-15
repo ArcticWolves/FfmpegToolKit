@@ -1,17 +1,12 @@
+@rem @label MP3 - LAME (VBR)
 @echo off
-setlocal EnableExtensions
-
-set "QUALITY=2"
-
-echo.
-set /p "QUALITY=VBR quality 0-9, lower is better [2]: "
-if not defined QUALITY set "QUALITY=2"
-
+rem ------------------------------------------------------------
+rem modules\codecs\audio\libmp3lame.bat
+rem libmp3lame, переменный битрейт по качеству.
+rem %1 = auto  ->  без вопросов, значения по умолчанию.
+rem Результат: AUDIO_CODEC, AUDIO_CODEC_OPTIONS
+rem ------------------------------------------------------------
+set "_q=2"
+if /i not "%~1"=="auto" call "%LIB%" :AskInt _q "VBR 0-9, меньше = лучше (0 ~ 245k, 2 ~ 190k)" 2 0 9
 set "AUDIO_CODEC=libmp3lame"
-set "AUDIO_CODEC_OPTIONS=-q:a %QUALITY%"
-
-endlocal & (
-    set "AUDIO_CODEC=%AUDIO_CODEC%"
-    set "AUDIO_CODEC_OPTIONS=%AUDIO_CODEC_OPTIONS%"
-)
-exit /b 0
+set "AUDIO_CODEC_OPTIONS=-q:a %_q%"

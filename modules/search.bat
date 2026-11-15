@@ -1,58 +1,51 @@
 @echo off
-setlocal EnableExtensions
-chcp 65001 >nul
+setlocal EnableExtensions EnableDelayedExpansion
 
 rem ============================================================
 rem modules\search.bat
-rem
-rem Search codecs, encoders, decoders and filters in current FFmpeg build.
+rem Поиск по энкодерам, декодерам, фильтрам и форматам сборки,
+rem а также подробная справка по конкретному имени.
 rem ============================================================
 
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FFmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
+if not defined CONFIG_LOADED (echo [ERROR] Запустите FFmpegToolkit.bat & pause & exit /b 1)
 
 :MAIN_MENU
+call "%LIB%" :Header "Поиск кодеков и фильтров"
+echo   1. Найти по слову (h264, blur, audio, png...)
+echo   2. Справка по энкодеру (все параметры), например libopus
+echo   3. Справка по фильтру, например drawtext
+echo   4. Справка по формату (муксеру), например mp4
+echo   0. Назад
+echo.
+call "%LIB%" :AskChoice "Выберите действие"
+if "%CHOICE%"=="1" goto FIND
+if "%CHOICE%"=="2" (set "KIND=encoder" & goto HELP)
+if "%CHOICE%"=="3" (set "KIND=filter" & goto HELP)
+if "%CHOICE%"=="4" (set "KIND=muxer" & goto HELP)
+if "%CHOICE%"=="0" goto EXIT_MODULE
+call "%LIB%" :InvalidChoice
+goto MAIN_MENU
+
+:FIND
+call "%LIB%" :Ask QUERY "Строка поиска" ""
+call "%LIB%" :Sanitize QUERY
+if not defined QUERY goto MAIN_MENU
 cls
-echo ============================================================
-echo                         Поиск
-echo ============================================================
+for %%L in (encoders decoders filters formats) do (
+    echo.
+    echo ===== %%L =====
+    "%FFMPEG%" -hide_banner -%%L 2>nul | findstr /i /c:"%QUERY%"
+)
 echo.
-echo Поиск выполняется по codec / encoder / decoder / filter.
-echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
+pause
+goto MAIN_MENU
 
-set "QUERY="
-set /p "QUERY=Введите строку поиска: "
-
-if not defined QUERY goto EXIT_MODULE
-if "%QUERY%"=="0" goto EXIT_MODULE
-
-echo.
-echo ===== Codecs =====
-"%FFMPEG%" -hide_banner -codecs | findstr /i /c:"%QUERY%"
-
-echo.
-echo ===== Encoders =====
-"%FFMPEG%" -hide_banner -encoders | findstr /i /c:"%QUERY%"
-
-echo.
-echo ===== Decoders =====
-"%FFMPEG%" -hide_banner -decoders | findstr /i /c:"%QUERY%"
-
-echo.
-echo ===== Filters =====
-"%FFMPEG%" -hide_banner -filters | findstr /i /c:"%QUERY%"
-
-echo.
+:HELP
+call "%LIB%" :Ask NAME "Имя (%KIND%)" ""
+call "%LIB%" :Sanitize NAME
+if not defined NAME goto MAIN_MENU
+cls
+"%FFMPEG%" -hide_banner -h %KIND%=%NAME% | more
 pause
 goto MAIN_MENU
 

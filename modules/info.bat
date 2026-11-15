@@ -1,189 +1,111 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
 
 rem ============================================================
 rem modules\info.bat
-rem
-rem Информационный модуль FFmpeg ToolKit.
-rem
-rem Назначение:
-rem   Предоставляет доступ к диагностической информации о
-rem   текущей сборке FFmpeg и позволяет сохранить вывод
-rem   в каталог logs.
-rem
-rem Архитектурная роль:
-rem   Controller для информационных и диагностических команд.
-rem
-rem Официальная документация:
-rem   https://ffmpeg.org/ffmpeg.html
+rem Информация о сборке FFmpeg: сводка возможностей, списки
+rem кодеков/фильтров/форматов. Любой список можно сохранить в
+rem temp\logs.
 rem ============================================================
 
-rem ------------------------------------------------------------
-rem Проверка конфигурации
-rem ------------------------------------------------------------
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FFmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
+if not defined CONFIG_LOADED (echo [ERROR] Запустите FFmpegToolkit.bat & pause & exit /b 1)
 
 :MAIN_MENU
+call "%LIB%" :Header "Информация о сборке FFmpeg"
+echo   1. Сводка возможностей ToolKit для этой сборки
+echo   2. Версия            7. Аппаратное ускорение (hwaccels)
+echo   3. Конфигурация      8. Форматы (контейнеры)
+echo   4. Кодеки            9. Протоколы
+echo   5. Энкодеры         10. Устройства
+echo   6. Фильтры          11. Лицензия
+echo   0. Назад
+echo.
+call "%LIB%" :AskChoice "Выберите пункт"
+set "ARG="
+if "%CHOICE%"=="1" goto SUMMARY
+if "%CHOICE%"=="2"  set "ARG=-version"
+if "%CHOICE%"=="3"  set "ARG=-buildconf"
+if "%CHOICE%"=="4"  set "ARG=-codecs"
+if "%CHOICE%"=="5"  set "ARG=-encoders"
+if "%CHOICE%"=="6"  set "ARG=-filters"
+if "%CHOICE%"=="7"  set "ARG=-hwaccels"
+if "%CHOICE%"=="8"  set "ARG=-formats"
+if "%CHOICE%"=="9"  set "ARG=-protocols"
+if "%CHOICE%"=="10" set "ARG=-devices"
+if "%CHOICE%"=="11" set "ARG=-L"
+if "%CHOICE%"=="0" goto EXIT_MODULE
+if not defined ARG (call "%LIB%" :InvalidChoice & goto MAIN_MENU)
+
+set "LOG_FILE="
+call "%LIB%" :AskYN "Сохранить вывод в temp\logs?" N
+if not errorlevel 1 (
+    call "%LIB%" :Timestamp TS
+    set "LOG_FILE=%LOG_DIR%\ffmpeg%ARG%_!TS!.txt"
+)
 cls
+if defined LOG_FILE (
+    "%FFMPEG%" -hide_banner %ARG% > "!LOG_FILE!" 2>&1
+    echo Сохранено: !LOG_FILE!
+    call "%LIB%" :AskYN "Открыть в Блокноте?" Y
+    if not errorlevel 1 start "" notepad "!LOG_FILE!"
+) else (
+    "%FFMPEG%" -hide_banner %ARG% | more
+    pause
+)
+goto MAIN_MENU
 
-echo ============================================================
-echo                     Информация
-echo ============================================================
-echo.
-echo Версия FFmpeg:
-echo %FFMPEG_VERSION%
-echo.
-echo ============================================================
-echo.
-echo  1. Версия FFmpeg
-echo  2. Build Configuration
-echo  3. Кодеки
-echo  4. Энкодеры
-echo  5. Декодеры
-echo  6. Фильтры
-echo  7. Аппаратные ускорители
-echo  8. Форматы
-echo  9. Протоколы
-echo 10. Устройства
-echo 11. Лицензия
-echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
 
-set "CHOICE="
-set /p "CHOICE=Выберите пункт: "
-
-if "%CHOICE%"=="1"  goto SHOW_VERSION
-if "%CHOICE%"=="2"  goto SHOW_BUILDCONF
-if "%CHOICE%"=="3"  goto SHOW_CODECS
-if "%CHOICE%"=="4"  goto SHOW_ENCODERS
-if "%CHOICE%"=="5"  goto SHOW_DECODERS
-if "%CHOICE%"=="6"  goto SHOW_FILTERS
-if "%CHOICE%"=="7"  goto SHOW_HWACCELS
-if "%CHOICE%"=="8"  goto SHOW_FORMATS
-if "%CHOICE%"=="9"  goto SHOW_PROTOCOLS
-if "%CHOICE%"=="10" goto SHOW_DEVICES
-if "%CHOICE%"=="11" goto SHOW_LICENSE
-if "%CHOICE%"=="0"  goto EXIT_MODULE
-
+rem ------------------------------------------------------------
+rem Сводка: что доступно и почему чего-то нет
+rem ------------------------------------------------------------
+:SUMMARY
+call "%LIB%" :Header "Возможности этой сборки"
+echo FFmpeg %FFMPEG_VERSION%, лицензия сборки: %FFMPEG_LICENSE%
 echo.
-echo [ERROR] Некорректный выбор.
+echo Видеокодеки (* - есть):
+call :Row "H.264 " "libx264 h264_nvenc h264_qsv h264_amf h264_mf libopenh264"
+call :Row "HEVC  " "libx265 hevc_nvenc hevc_qsv hevc_amf hevc_mf libkvazaar"
+call :Row "AV1   " "libsvtav1 av1_nvenc av1_qsv av1_amf libaom-av1 librav1e"
+call :Row "Прочие" "libvvenc libvpx-vp9 libvpx libtheora prores_ks dnxhd ffv1 utvideo mpeg4 mpeg2video"
+echo Аудиокодеки:
+call :Row "      " "aac libopus libvorbis libmp3lame flac alac ac3 eac3"
+echo Изображения:
+call :Row "      " "png mjpeg libwebp libaom-av1 libjxl tiff bmp qoi dpx exr hdr jpeg2000"
+echo.
+echo Фильтры:
+call :FRow "      " "vidstabdetect deshake eq hqdn3d nlmeans unsharp bwdif lut3d drawtext subtitles"
+call :FRow "      " "loudnorm afftdn whisper libvmaf minterpolate showwavespic gblur colortemperature"
+echo.
+if not "%FFMPEG_LICENSE%"=="GPL" (
+    echo Сборка без GPL-компонентов. Недоступны: libx264, libx265, vidstab,
+    echo eq, hqdn3d и другие GPL-фильтры. ToolKit автоматически использует
+    echo замены: OpenH264/Kvazaar/Media Foundation/NVENC/QSV/AMF, deshake,
+    echo lutyuv+hue, nlmeans/atadenoise.
+    echo Для максимума возможностей положите в source\bin GPL-сборку
+    echo ^(BtbN: ffmpeg-master-latest-win64-gpl-shared^) и нажмите R
+    echo в главном меню. Подробнее про лицензии: Readme.txt
+)
 echo.
 pause
 goto MAIN_MENU
 
-
-rem ============================================================
-rem Подпрограмма запуска команды FFmpeg
-rem
-rem Аргументы:
-rem   %~1 - аргумент командной строки FFmpeg
-rem   %~2 - базовое имя лог-файла
-rem ============================================================
-:RunFFmpegCommand
-cls
-
-echo ============================================================
-echo Выполнение: "%FFMPEG%" %~1
-echo ============================================================
-echo.
-
-set "SAVE_LOG="
-set /p "SAVE_LOG=Сохранить вывод в logs? (Y/N): "
-
-if /i "%SAVE_LOG%"=="Y" (
-    rem Формирование временной метки
-    for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm-ss"') do (
-        set "TIMESTAMP=%%I"
-    )
-
-    rem Имя лог-файла
-    set "LOG_BASENAME=%~2"
-    if not defined LOG_BASENAME set "LOG_BASENAME=ffmpeg_info"
-
-    set "LOG_FILE=%LOG_DIR%\%LOG_BASENAME%_%TIMESTAMP%.txt"
-
-    echo.
-    echo Сохранение в:
-    echo %LOG_FILE%
-    echo.
-
-    "%FFMPEG%" %~1 > "%LOG_FILE%" 2>&1
-
-    echo.
-    echo ============================================================
-    echo                        Лог сохранен
-    echo ============================================================
-    echo.
-    echo %LOG_FILE%
-    echo.
-) else (
-    "%FFMPEG%" %~1
+:Row
+set "_line=  %~1 :"
+for %%E in (%~2) do (
+    if defined HAS_ENC_%%E (set "_line=!_line! *%%E") else (set "_line=!_line!  %%E")
 )
+echo !_line!
+exit /b 0
 
-echo.
-pause
+:FRow
+set "_line=  %~1 :"
+for %%E in (%~2) do (
+    if defined HAS_FLT_%%E (set "_line=!_line! *%%E") else (set "_line=!_line!  %%E")
+)
+echo !_line!
 exit /b 0
 
 
-:SHOW_VERSION
-call :RunFFmpegCommand -version version
-goto MAIN_MENU
-
-:SHOW_BUILDCONF
-call :RunFFmpegCommand -buildconf buildconf
-goto MAIN_MENU
-
-:SHOW_CODECS
-call :RunFFmpegCommand -codecs codecs
-goto MAIN_MENU
-
-:SHOW_ENCODERS
-call :RunFFmpegCommand -encoders encoders
-goto MAIN_MENU
-
-:SHOW_DECODERS
-call :RunFFmpegCommand -decoders decoders
-goto MAIN_MENU
-
-:SHOW_FILTERS
-call :RunFFmpegCommand -filters filters
-goto MAIN_MENU
-
-:SHOW_HWACCELS
-call :RunFFmpegCommand -hwaccels hwaccels
-goto MAIN_MENU
-
-:SHOW_FORMATS
-call :RunFFmpegCommand -formats formats
-goto MAIN_MENU
-
-:SHOW_PROTOCOLS
-call :RunFFmpegCommand -protocols protocols
-goto MAIN_MENU
-
-:SHOW_DEVICES
-call :RunFFmpegCommand -devices devices
-goto MAIN_MENU
-
-:SHOW_LICENSE
-call :RunFFmpegCommand -L license
-goto MAIN_MENU
-
-
-rem ============================================================
-rem Выход
-rem ============================================================
 :EXIT_MODULE
 endlocal
 exit /b 0

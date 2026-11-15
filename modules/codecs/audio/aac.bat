@@ -1,17 +1,12 @@
+@rem @label AAC (универсальный, MP4/M4A)
 @echo off
-setlocal EnableExtensions
-
-set "BITRATE=192k"
-
-echo.
-set /p "BITRATE=Audio bitrate [192k]: "
-if not defined BITRATE set "BITRATE=192k"
-
+rem ------------------------------------------------------------
+rem modules\codecs\audio\aac.bat
+rem Встроенный энкодер aac.
+rem %1 = auto  ->  без вопросов, значения по умолчанию.
+rem Результат: AUDIO_CODEC, AUDIO_CODEC_OPTIONS
+rem ------------------------------------------------------------
+set "_b=192k"
+if /i not "%~1"=="auto" call "%LIB%" :AskBitrate _b "Битрейт аудио" 192k
 set "AUDIO_CODEC=aac"
-set "AUDIO_CODEC_OPTIONS=-b:a %BITRATE%"
-
-endlocal & (
-    set "AUDIO_CODEC=%AUDIO_CODEC%"
-    set "AUDIO_CODEC_OPTIONS=%AUDIO_CODEC_OPTIONS%"
-)
-exit /b 0
+set "AUDIO_CODEC_OPTIONS=-b:a %_b%"

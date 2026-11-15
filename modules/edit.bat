@@ -1,210 +1,99 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
 
 rem ============================================================
 rem modules\edit.bat
+rem Раздел "Редактирование". Контроллер операций modules\edit\*.bat.
 rem
-rem Раздел "Редактирование".
-rem
-rem Назначение:
-rem   Отображает меню операций редактирования и передаёт
-rem   управление специализированным подмодулям.
-rem
-rem Архитектурная роль:
-rem   Controller.
-rem
-rem Структура раздела:
-rem   modules\
-rem       edit.bat
-rem       edit\
-rem           trim.bat
-rem           concat.bat
-rem           speed.bat
-rem           rotate.bat
-rem           resize.bat
-rem           overlay.bat
-rem           stabilization.bat
-rem           filters\
-rem               color_correction.bat
-rem               color_equalizer.bat
-rem               color_hue.bat
+rem Каждая операция вызывается в отдельном setlocal: её переменные
+rem не влияют на следующие операции. Перед операцией (кроме склейки)
+rem выбирается входной файл.
 rem ============================================================
 
-rem ------------------------------------------------------------
-rem Проверка загрузки конфигурации
-rem ------------------------------------------------------------
-if not defined CONFIG_LOADED (
-    echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FfmpegToolKit.bat.
-    echo.
-    pause
-    exit /b 1
-)
+if not defined CONFIG_LOADED (echo [ERROR] Запустите FFmpegToolkit.bat & pause & exit /b 1)
 
 :MAIN_MENU
-cls
+call "%LIB%" :Header "Редактирование"
+echo  --- Время ------------------------  --- Изображение ----------------
+echo   1. Обрезка (trim)                   11. Цветокоррекция и LUT
+echo   2. Склейка файлов                   12. Шумоподавление видео
+echo   3. Скорость                         13. Резкость
+echo   4. Реверс                           14. Деинтерлейсинг
+echo   5. Частота кадров (FPS)             15. Появление / затухание
+echo   6. Нарезка на сегменты              16. Стабилизация
+echo.
+echo  --- Кадр -------------------------  --- Наложение ------------------
+echo   7. Поворот / отражение              17. Водяной знак (картинка)
+echo   8. Масштабирование                  18. Текст
+echo   9. Кадрирование (crop)              19. Вшить субтитры
+echo  10. Поля до нужных пропорций (pad)
+echo.
+echo  --- Аудио ------------------------------------------------------
+echo  20. Нормализация громкости (EBU R128)   23. Удалить аудио
+echo  21. Громкость                           24. Шумоподавление аудио
+echo  22. Заменить / добавить аудиодорожку
+echo.
+echo   0. Назад
+echo.
+call "%LIB%" :AskChoice "Выберите операцию"
 
-echo ============================================================
-echo                      Редактирование
-echo ============================================================
-echo.
-echo  1. Обрезка по времени (Trim)
-echo  2. Склейка (Concat)
-echo  3. Изменение скорости
-echo  4. Поворот
-echo  5. Изменение размера (Resolution)
-echo  6. Наложение изображения или видео (Overlay)
-echo  7. Цветокоррекция
-echo  8. Стабилизация
-echo  9. Обрезка области (Crop)
-echo  10. Добавить текст (DrawText)
-echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
+set "OP="
+if "%CHOICE%"=="1"  set "OP=trim"
+if "%CHOICE%"=="2"  set "OP=concat"
+if "%CHOICE%"=="3"  set "OP=speed"
+if "%CHOICE%"=="4"  set "OP=reverse"
+if "%CHOICE%"=="5"  set "OP=fps"
+if "%CHOICE%"=="6"  set "OP=segment"
+if "%CHOICE%"=="7"  set "OP=rotate"
+if "%CHOICE%"=="8"  set "OP=resize"
+if "%CHOICE%"=="9"  set "OP=crop"
+if "%CHOICE%"=="10" set "OP=pad"
+if "%CHOICE%"=="11" set "OP=color_correction"
+if "%CHOICE%"=="12" set "OP=denoise"
+if "%CHOICE%"=="13" set "OP=sharpen"
+if "%CHOICE%"=="14" set "OP=deinterlace"
+if "%CHOICE%"=="15" set "OP=fade"
+if "%CHOICE%"=="16" set "OP=stabilization"
+if "%CHOICE%"=="17" set "OP=overlay"
+if "%CHOICE%"=="18" set "OP=drawtext"
+if "%CHOICE%"=="19" set "OP=subtitles"
+if "%CHOICE%"=="20" set "OP=loudnorm"
+if "%CHOICE%"=="21" set "OP=volume"
+if "%CHOICE%"=="22" set "OP=audio_replace"
+if "%CHOICE%"=="23" set "OP=audio_remove"
+if "%CHOICE%"=="24" set "OP=audio_denoise"
 
-set "CHOICE="
-set /p "CHOICE=Выберите действие: "
-
-if "%CHOICE%"=="1" goto MENU_TRIM
-if "%CHOICE%"=="2" goto MENU_CONCAT
-if "%CHOICE%"=="3" goto MENU_SPEED
-if "%CHOICE%"=="4" goto MENU_ROTATE
-if "%CHOICE%"=="5" goto MENU_RESIZE
-if "%CHOICE%"=="6" goto MENU_OVERLAY
-if "%CHOICE%"=="7" goto MENU_COLOR_CORRECTION
-if "%CHOICE%"=="8" goto MENU_STABILIZATION
-if "%CHOICE%"=="9" goto MENU_CROP
-if "%CHOICE%"=="10" goto MENU_DRAWTEXT
 if "%CHOICE%"=="0" goto EXIT_MODULE
+if not defined OP (
+    call "%LIB%" :InvalidChoice
+    goto MAIN_MENU
+)
 
-echo.
-echo [ERROR] Некорректный выбор.
-echo.
-pause
+call :RunOperation "%OP%"
 goto MAIN_MENU
 
 
 rem ============================================================
-rem 1. Обрезка
+rem :RunOperation имя
 rem ============================================================
-:MENU_TRIM
-call :RunModule "edit\trim.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 2. Склейка
-rem ============================================================
-:MENU_CONCAT
-call :RunModule "edit\concat.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 3. Изменение скорости
-rem ============================================================
-:MENU_SPEED
-call :RunInputModule "edit\speed.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 4. Поворот
-rem ============================================================
-:MENU_ROTATE
-call :RunInputModule "edit\rotate.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 5. Изменение размера
-rem ============================================================
-:MENU_RESIZE
-call :RunInputModule "edit\resize.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 6. Наложение изображения или видео (Overlay)
-rem ============================================================
-:MENU_OVERLAY
-call :RunInputModule "edit\overlay.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 7. Цветокоррекция
-rem ============================================================
-:MENU_COLOR_CORRECTION
-call :RunInputModule "edit\color_correction.bat"
-goto MAIN_MENU
-
-rem ============================================================
-rem 8. Стабилизация
-rem ============================================================
-:MENU_STABILIZATION
-call :RunInputModule "edit\stabilization.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 9. Обрезка области
-rem ============================================================
-:MENU_CROP
-call :RunInputModule "edit\crop.bat"
-goto MAIN_MENU
-
-
-rem ============================================================
-rem 10. Наложение текста
-rem ============================================================
-:MENU_DRAWTEXT
-call :RunInputModule "edit\drawtext.bat"
-goto MAIN_MENU
-
-rem ============================================================
-rem Универсальный запуск модуля
-rem
-rem Аргумент:
-rem   %~1 - относительный путь внутри %MODULES_DIR%
-rem
-rem Пример:
-rem   call :RunModule "edit\concat.bat"
-rem ============================================================
-:RunModule
-set "MODULE_PATH=%MODULES_DIR%\%~1"
-
-if not exist "%MODULE_PATH%" (
-    echo.
-    echo [ERROR] Не найден модуль:
-    echo         %MODULE_PATH%
-    echo.
+:RunOperation
+set "OP_FILE=%MODULES_DIR%\edit\%~1.bat"
+if not exist "%OP_FILE%" (
+    echo [ERROR] Не найден модуль: %OP_FILE%
     pause
     exit /b 1
 )
-
-call "%MODULE_PATH%"
+setlocal
+set "EDIT_MODE=1"
+if /i not "%~1"=="concat" (
+    call "%SELECTORS_DIR%\select_input_file.bat"
+    if errorlevel 1 (endlocal & exit /b 0)
+)
+call "%OP_FILE%"
+endlocal
 exit /b 0
 
 
-rem ============================================================
-rem Запуск модуля, которому нужен INPUT_FILE
-rem ============================================================
-:RunInputModule
-call "%SELECTORS_DIR%\select_input_file.bat"
-if errorlevel 1 exit /b 1
-
-call :RunModule "%~1"
-exit /b 0
-
-
-rem ============================================================
-rem Выход из раздела
-rem ============================================================
 :EXIT_MODULE
 endlocal
 exit /b 0

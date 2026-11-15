@@ -1,314 +1,166 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
-chcp 65001 >nul
-
 rem ============================================================
 rem modules\edit\concat.bat
-rem
-rem Склейка нескольких файлов с использованием concat demuxer.
-rem
-rem Назначение:
-rem   Объединяет несколько видео- или аудиофайлов в один файл
-rem   без перекодирования (stream copy).
-rem
-rem Требования:
-rem   - Все входные файлы должны иметь одинаковые параметры:
-rem       * одинаковый контейнер;
-rem       * одинаковые кодеки;
-rem       * одинаковые параметры потоков.
-rem
-rem Используемый механизм:
-rem   ffmpeg -f concat -safe 0 -i list.txt -c copy output.ext
-rem
-rem Официальная документация:
-rem   https://ffmpeg.org/ffmpeg-formats.html#concat
+rem Склейка нескольких файлов.
+rem   Без перекодирования (concat demuxer) - мгновенно, но все файлы
+rem   должны иметь одинаковые кодеки, разрешение и параметры звука.
+rem   С перекодированием (фильтр concat) - любые файлы: разрешение
+rem   приводится к первому файлу, звук - к 48 кГц стерео.
 rem ============================================================
 
-rem ------------------------------------------------------------
-rem Проверка конфигурации
-rem ------------------------------------------------------------
-if not defined CONFIG_LOADED (
+set "LIST_FILE=%TEMP_DIR%\concat_list.txt"
+set "N=0"
+
+:MENU
+call "%LIB%" :Header "Склейка файлов"
+echo Файлов в списке: %N%
+for /L %%I in (1,1,%N%) do call :ShowItem %%I
+echo.
+echo   1. Добавить все медиафайлы из папки input (по имени)
+echo   2. Добавить файл
+echo   3. Очистить список
+echo   4. Склеить без перекодирования (быстро)
+echo   5. Склеить с перекодированием (любые файлы)
+echo   0. Назад
+echo.
+call "%LIB%" :AskChoice "Выберите действие"
+if "%CHOICE%"=="1" goto ADD_ALL
+if "%CHOICE%"=="2" goto ADD_ONE
+if "%CHOICE%"=="3" (set "N=0" & goto MENU)
+if "%CHOICE%"=="4" goto RUN_COPY
+if "%CHOICE%"=="5" goto RUN_REENCODE
+if "%CHOICE%"=="0" exit /b 0
+call "%LIB%" :InvalidChoice
+goto MENU
+
+:ADD_ALL
+for /f "delims=" %%F in ('dir /b /a-d /on "%INPUT_DIR%" 2^>nul') do (
+    call "%LIB%" :IsMediaFile "%%F"
+    if not errorlevel 1 (
+        set /a N+=1
+        set "F_!N!=%INPUT_DIR%\%%F"
+    )
+)
+goto MENU
+
+:ADD_ONE
+set "INPUT_TITLE=Добавить файл в склейку"
+call "%SELECTORS_DIR%\select_input_file.bat"
+if errorlevel 1 goto MENU
+set /a N+=1
+set "F_%N%=%INPUT_FILE%"
+goto MENU
+
+:CHECK_COUNT
+call "%LIB%" :ResetJob
+if %N% LSS 2 (
     echo.
-    echo [ERROR] Конфигурация не загружена.
-    echo [ERROR] Запустите FfmpegToolKit.bat.
-    echo.
+    echo [ERROR] Нужно минимум два файла.
     pause
     exit /b 1
 )
-
-rem ------------------------------------------------------------
-rem Подготовка рабочего каталога
-rem ------------------------------------------------------------
-set "CONCAT_DIR=%TEMP_DIR%\concat"
-
-if not exist "%CONCAT_DIR%" (
-    mkdir "%CONCAT_DIR%"
-)
-
-set "LIST_FILE=%CONCAT_DIR%\concat_list.txt"
-
-:MAIN_MENU
-cls
-
-echo ============================================================
-echo                         Склейка
-echo ============================================================
-echo.
-echo Метод:
-echo   Concat Demuxer (без перекодирования)
-echo.
-echo Требования:
-echo   Все файлы должны иметь одинаковые параметры.
-echo.
-echo ============================================================
-echo.
-echo  1. Автоматически использовать все файлы из input
-echo  2. Создать список вручную
-echo  3. Открыть временную папку concat
-echo.
-echo  0. Назад
-echo.
-echo ============================================================
-echo.
-
-set "CHOICE="
-set /p "CHOICE=Выберите действие: "
-
-if "%CHOICE%"=="1" goto AUTO_BUILD_LIST
-if "%CHOICE%"=="2" goto MANUAL_BUILD_LIST
-if "%CHOICE%"=="3" goto OPEN_TEMP_FOLDER
-if "%CHOICE%"=="0" goto EXIT_MODULE
-
-echo.
-echo [ERROR] Некорректный выбор.
-echo.
-pause
-goto MAIN_MENU
-
-
-rem ============================================================
-rem Автоматическое создание списка
-rem ============================================================
-:AUTO_BUILD_LIST
-cls
-
-echo ============================================================
-echo           Автоматическое создание списка файлов
-echo ============================================================
-echo.
-
-del /q "%LIST_FILE%" >nul 2>&1
-
-set "FILE_COUNT=0"
-set "FIRST_EXT="
-
-for %%F in ("%INPUT_DIR%\*.*") do (
-    if exist "%%~fF" (
-        if not defined FIRST_EXT (
-            set "FIRST_EXT=%%~xF"
-        )
-
-        if /i "%%~xF"=="!FIRST_EXT!" (
-            >> "%LIST_FILE%" echo file '%%~fF'
-            set /a FILE_COUNT+=1
-        )
-    )
-)
-
-if "!FILE_COUNT!"=="0" (
-    echo [ERROR] В папке input нет файлов.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-if "!FILE_COUNT!"=="1" (
-    echo [ERROR] Для склейки требуется минимум два файла.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-echo Найдено файлов: !FILE_COUNT!
-echo Расширение: !FIRST_EXT!
-echo.
-echo Список создан:
-echo %LIST_FILE%
-echo.
-pause
-
-goto PREPARE_OUTPUT
-
-
-rem ============================================================
-rem Ручное создание списка
-rem ============================================================
-:MANUAL_BUILD_LIST
-cls
-
-echo ============================================================
-echo             Ручное создание списка файлов
-echo ============================================================
-echo.
-echo Введите полные пути к файлам.
-echo Для завершения введите пустую строку.
-echo.
-
-del /q "%LIST_FILE%" >nul 2>&1
-
-set "FILE_COUNT=0"
-
-:INPUT_LOOP
-set "CURRENT_FILE="
-set /p "CURRENT_FILE=Файл !FILE_COUNT!: "
-
-if not defined CURRENT_FILE goto CHECK_MANUAL_COUNT
-
-if not exist "%CURRENT_FILE%" (
-    echo.
-    echo [ERROR] Файл не найден.
-    echo.
-    goto INPUT_LOOP
-)
-
->> "%LIST_FILE%" echo file '%CURRENT_FILE%'
-set /a FILE_COUNT+=1
-
-goto INPUT_LOOP
-
-
-:CHECK_MANUAL_COUNT
-if "!FILE_COUNT!"=="0" (
-    echo.
-    echo [ERROR] Не добавлено ни одного файла.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-if "!FILE_COUNT!"=="1" (
-    echo.
-    echo [ERROR] Для склейки требуется минимум два файла.
-    echo.
-    pause
-    goto MAIN_MENU
-)
-
-echo.
-echo Добавлено файлов: !FILE_COUNT!
-echo.
-pause
-
-goto PREPARE_OUTPUT
-
-
-rem ============================================================
-rem Подготовка выходного файла
-rem ============================================================
-:PREPARE_OUTPUT
-cls
-
-for /f "usebackq delims=" %%L in ("%LIST_FILE%") do (
-    set "FIRST_LINE=%%L"
-    goto GOT_FIRST_LINE
-)
-
-:GOT_FIRST_LINE
-
-rem Извлекаем путь первого файла
-set "FIRST_FILE=!FIRST_LINE:file '=!"
-set "FIRST_FILE=!FIRST_FILE:'=!"
-
-for %%F in ("!FIRST_FILE!") do (
-    set "INPUT_EXT=%%~xF"
-    set "BASE_NAME=%%~nF"
-)
-
-set "INPUT_FILE=!FIRST_FILE!"
-set "OUTPUT_EXT=%INPUT_EXT:~1%"
+set "INPUT_FILE=%F_1%"
+for %%F in ("%F_1%") do (set "INPUT_NAME=%%~nF" & set "INPUT_EXT=%%~xF")
+set "INPUT_EXT=%INPUT_EXT:~1%"
+set "OUTPUT_BASE=%INPUT_NAME%"
 set "OUTPUT_SUFFIX=concat"
-call "%SELECTORS_DIR%\select_output_file.bat"
-if errorlevel 1 goto MAIN_MENU
-
-goto RUN_CONCAT
+exit /b 0
 
 
-rem ============================================================
-rem Выполнение склейки
-rem ============================================================
-:RUN_CONCAT
-cls
+rem ------------------------------------------------------------
+rem Без перекодирования: список для concat demuxer.
+rem Апостроф в пути экранируется как '\''
+rem ------------------------------------------------------------
+:RUN_COPY
+call :CHECK_COUNT
+if errorlevel 1 goto MENU
+type nul > "%LIST_FILE%"
+for /L %%I in (1,1,%N%) do call :ShowItem
+call set "_p=%%F_%1%%"
+echo   %1. !_p!
+exit /b 0
 
-echo ============================================================
-echo                    Выполнение склейки
-echo ============================================================
-echo.
-echo Список файлов:
-echo %LIST_FILE%
-echo.
-echo Выходной файл:
-echo %OUTPUT_FILE%
-echo.
-echo Команда:
-echo "%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% -f concat -safe 0 -i "%LIST_FILE%" -c copy "%OUTPUT_FILE%"
-echo.
-echo Нажмите любую клавишу для запуска...
-echo.
-pause >nul
+:WriteListLine %%I
+set "INPUT_FILE=%LIST_FILE%"
+set "INPUT_OPTS=-f concat -safe 0"
+set "ENC_FIXED_ARGS=-map 0 -c copy"
+set "JOB_TITLE=Склейка без перекодирования"
+call "%TRANSCODE%"
+goto MENU
 
-"%FFMPEG%" %FFMPEG_GLOBAL_OPTIONS% ^
--f concat ^
--safe 0 ^
--i "%LIST_FILE%" ^
--c copy ^
-"%OUTPUT_FILE%"
 
-if errorlevel 1 (
-    echo.
-    echo [ERROR] Склейка завершилась с ошибкой.
-    echo.
-    echo Возможные причины:
-    echo - файлы имеют разные кодеки;
-    echo - разные параметры видео или аудио;
-    echo - поврежденные входные файлы.
-    echo.
+rem ------------------------------------------------------------
+rem С перекодированием: фильтр concat. Каждый вход приводится к
+rem размеру первого файла (с полями), 30 fps и 48 кГц стерео.
+rem Если хотя бы у одного файла нет звука - склеивается только видео.
+rem ------------------------------------------------------------
+:RUN_REENCODE
+call :CHECK_COUNT
+if errorlevel 1 goto MENU
+call "%LIB%" :ProbeInput
+if not defined IN_WIDTH (
+    echo [ERROR] В первом файле нет видео.
     pause
-    goto MAIN_MENU
+    goto MENU
 )
+set "W=%IN_WIDTH%"
+set "H=%IN_HEIGHT%"
+set /a "W=W/2*2, H=H/2*2"
 
-echo.
-echo ============================================================
-echo                        Готово
-echo ============================================================
-echo.
-echo Выходной файл:
-echo %OUTPUT_FILE%
-echo.
+set "ALL_AUDIO=1"
+for /L %%I in (1,1,%N%) do call :CheckAudio %%I
 
-if "%HAS_FFPLAY%"=="1" (
-    set "PLAY_RESULT="
-    set /p "PLAY_RESULT=Открыть результат в FFplay? (Y/N): "
-
-    if /i "%PLAY_RESULT%"=="Y" (
-        "%FFPLAY%" %FFPLAY_GLOBAL_OPTIONS% "%OUTPUT_FILE%"
-    )
+set "EXTRA_INPUTS="
+set "FC="
+set "CAT="
+set /a "LAST=N-1"
+for /L %%I in (0,1,%LAST%) do call :AddInput %%I
+if "%ALL_AUDIO%"=="1" (
+    set "FILTER_COMPLEX=!FC!!CAT!concat=n=%N%:v=1:a=1[v][a]"
+    set "MAP_ARGS=-map "[v]" -map "[a]""
+) else (
+    echo [WARN] Не у всех файлов есть звук - результат будет без звука.
+    pause
+    set "FILTER_COMPLEX=!FC!!CAT!concat=n=%N%:v=1:a=0[v]"
+    set "MAP_ARGS=-map "[v]""
+    set "ENC_NO_AUDIO=1"
 )
-
-pause
-goto MAIN_MENU
-
-
-rem ============================================================
-rem Открытие временной папки
-rem ============================================================
-:OPEN_TEMP_FOLDER
-start "" "%CONCAT_DIR%"
-goto MAIN_MENU
+set "ENC_VIDEO_NO_COPY=1"
+set "ENC_AUDIO_NO_COPY=1"
+set "JOB_TITLE=Склейка с перекодированием"
+call "%TRANSCODE%"
+goto MENU
 
 
-rem ============================================================
-rem Выход
-rem ============================================================
-:EXIT_MODULE
-endlocal
+rem ------------------------------------------------------------
+rem Вспомогательные подпрограммы (индексные переменные F_1..F_N)
+rem ------------------------------------------------------------
+:ShowItem
+call set "_p=%%F_%1%%"
+echo   %1. !_p!
+exit /b 0
+
+:WriteListLine
+call set "_p=%%F_%1%%"
+set "_p=!_p:'='\''!"
+>> "%LIST_FILE%" echo file '!_p!'
+exit /b 0
+
+:CheckAudio
+call set "_p=%%F_%1%%"
+call "%LIB%" :Probe _a "-select_streams a:0 -show_entries stream=codec_name" "%_p%"
+if not defined _a set "ALL_AUDIO=0"
+exit /b 0
+
+:AddInput
+set /a "_j=%1+1"
+call set "_p=%%F_%_j%%%"
+if %1 GTR 0 set "EXTRA_INPUTS=!EXTRA_INPUTS! -i "!_p!""
+set "FC=!FC![%1:v]scale=%W%:%H%:force_original_aspect_ratio=decrease,pad=%W%:%H%:-1:-1,setsar=1,fps=30,format=yuv420p[v%1];"
+if "%ALL_AUDIO%"=="1" (
+    set "FC=!FC![%1:a]aresample=48000,aformat=channel_layouts=stereo[a%1];"
+    set "CAT=!CAT![v%1][a%1]"
+) else (
+    set "CAT=!CAT![v%1]"
+)
 exit /b 0

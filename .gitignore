@@ -1,31 +1,42 @@
-# Output directories
+# Результаты и временные файлы
 output/
 temp/
 logs/
-
-# Log files
 *.log
 
-# Temporary files
+# Бинарники FFmpeg скачиваются отдельно (см. Readme.txt)
+source/bin/
+source/include/
+source/lib/
+source/doc/
+source/presets/
+
+# Модели Whisper (сотни мегабайт)
+models/*.bin
+
+# Пользовательские медиафайлы
+input/*
+!input/.gitkeep
+
+# Временные и резервные файлы
 *.tmp
 *.temp
-
-# Backup files
 *.bak
 *.old
 
-# User-specific config (optional)
+# Локальная конфигурация
 config.local.bat
 
-# Windows system files
+# Системные файлы Windows
 Thumbs.db
 Desktop.ini
+desktop.ini
 
-# IDE folders
+# IDE
 .vs/
 .vscode/
 
-# Archive files
+# Архивы
 *.zip
 *.7z
 *.rar
